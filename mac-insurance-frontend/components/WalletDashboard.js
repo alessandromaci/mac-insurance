@@ -3,7 +3,7 @@ import { useState } from "react";
 import ethLogo from "../public/ethLogo.png";
 import btcLogo from "../public/bitcoin.svg";
 import Image from "next/image";
-import { DashboardDetailsModal } from "./DashboardDetailsModal";
+import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";
 
 const dummyData = [
@@ -33,6 +33,12 @@ const dummyData = [
 
 export const WalletDashboard = () => {
   const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState();
+
+  const handleModalOpening = (data) => {
+    setModalData(data);
+    setShowModal(true);
+  };
 
   const reimburse = () => {
     // Do reimburse stuff
@@ -73,28 +79,23 @@ export const WalletDashboard = () => {
                 </div>
                 <div className={s.data}>
                   <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => handleModalOpening(item)}
                     className={s.dataButton}
                   >
                     Details
                   </button>
                 </div>
               </div>
-              <DashboardDetailsModal
-                onClose={() => setShowModal(false)}
-                show={showModal}
-                title={item.insuranceDetails}
-                asset={item.asset}
-                cover={item.cover}
-                fee={item.fee}
-                validityPeriod={item.validityPeriod}
-                totalInsured={item.totalInsured}
-              />
             </div>
           ))}
         </div>
       </div>
       <ToastContainer />
+      <DashboardDetailsModal
+        onClose={() => setShowModal(false)}
+        show={showModal}
+        item={modalData}
+      />
     </div>
   );
 };

@@ -1,18 +1,9 @@
-import s from "../styles/DashboardDetailsModal.module.scss";
+import s from "../../styles/DashboardDetailsModal.module.scss";
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { FaTimesCircle } from "react-icons/fa";
 
-export const DashboardDetailsModal = ({
-  show,
-  onClose,
-  title,
-  asset,
-  cover,
-  fee,
-  validityPeriod,
-  totalInsured,
-}) => {
+export const DashboardDetailsModal = ({ show, onClose, item }) => {
   const [isBrowser, setIsBrowser] = useState(false);
 
   useEffect(() => {
@@ -29,32 +20,32 @@ export const DashboardDetailsModal = ({
       <div className={s.modal}>
         <div className={s.modalHeader}>
           <div />
-          <h3 className={s.modalTitle}>{title}</h3>
+          <h3 className={s.modalTitle}>Insurance Details</h3>
           <FaTimesCircle className={s.modalIcon} onClick={handleCloseClick} />
         </div>
 
         <div className={s.modalBody}>
           <div className={s.modalRow}>
             <p className={s.label}>Asset</p>
-            <p className={s.value}>{asset}</p>
+            <p className={s.value}>{item.asset}</p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Price Loss Cover %</p>
-            <p className={s.value}>{cover}</p>
+            <p className={s.value}>{item.cover}</p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Fee %</p>
-            <p className={s.value}>{fee}</p>
+            <p className={s.value}>{item.fee}</p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Validity Period</p>
             <p className={s.value}>
-              {validityPeriod.from} - {validityPeriod.to}
+              {item.validityPeriod.from} - {item.validityPeriod.to}
             </p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Total Amount Insured</p>
-            <p className={s.value}>{totalInsured}</p>
+            <p className={s.value}>{item.totalInsured}</p>
           </div>
         </div>
       </div>

@@ -1,0 +1,68 @@
+@import "./colors";
+@import "./variables";
+
+.modalOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+  background: #747479;
+  width: $tablet;
+  border-radius: $x2;
+  padding: $space-large $space-normal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.modalTitle {
+  color: $extraDark;
+  font-weight: 100;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  width: 25%;
+  margin: auto;
+  justify-content: space-between;
+}
+
+.priceLabel {
+  font-size: 28px;
+  font-weight: 700;
+  color: $extraDark;
+}
+
+.priceValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: $extraDark;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  width: 30%;
+  margin: auto;
+  justify-content: space-between;
+}
+
+.modalButton {
+  color: $extraDark;
+  padding: $x1 $x2;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
