@@ -1,0 +1,35 @@
+@import "./colors";
+@import "./variables";
+
+.container {
+  padding: $space-large;
+  display: flex;
+  justify-content: space-between;
+
+  @media (max-width: $phone) {
+    flex-direction: column;
+    justify-content: center;
+    padding: $space-normal;
+  }
+}
+
+.headingItem {
+  background-color: $dark;
+  padding: $x1 $x4;
+  border-radius: $x8;
+  margin: 0;
+  color: $green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: $phone) {
+    margin-bottom: $x2;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.text {
+  margin: 0;
+}

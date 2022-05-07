@@ -1,0 +1,24 @@
+@import "./colors";
+@import "./variables";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: $extraDark;
+  color: $text;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: $space-large;
+  // justify-content: center;
+  // align-items: center;
+
+  @media (max-width: $tablet) {
+    padding: $space-normal;
+  }
+}

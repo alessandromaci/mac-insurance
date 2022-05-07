@@ -1,0 +1,67 @@
+@import "./colors";
+@import "./variables";
+
+.container {
+  min-width: $tablet;
+  margin: $space-huge auto $space-large auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pillSelected {
+  background-color: $green;
+  border-radius: $x1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 200px;
+  padding: $x1 $x2;
+  border: none;
+  margin: $x1 0;
+  border: 2px solid $green;
+  cursor: pointer;
+  font-size: 18px;
+  color: $dark;
+  &:hover {
+    opacity: 0.6;
+  }
+
+  @media (max-width: $tablet) {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  &.fullWidth {
+    width: 100%;
+  }
+}
+
+.pill {
+  background-color: transparent;
+  border: 2px solid $green;
+  border-radius: $x1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 200px;
+  padding: $x1 $x2;
+  color: $green;
+  margin: $x1 0;
+  font-size: 18px;
+  cursor: pointer;
+  &:hover {
+    background-color: $green;
+    color: $extraDark;
+    opacity: 0.6;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  @media (max-width: $tablet) {
+    height: 40px;
+    font-size: 14px;
+  }
+}
