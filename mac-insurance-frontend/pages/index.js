@@ -3,9 +3,6 @@ import s from "../styles/Home.module.scss";
 import { Layout } from "../components/Layout";
 import Web3Modal from "web3modal";
 import { ethers } from "ethers";
-import { TabButtonContainer } from "../components/TabButtonContainer";
-import { NoWalletDashboard } from "../components/NoWalletDashboard";
-import { WalletDashboard } from "../components/WalletDashboard";
 import { TabSelector } from "../components/TabSelector";
 
 export default function Home() {
