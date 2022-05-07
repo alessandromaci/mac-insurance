@@ -7,4 +7,6 @@ library Errors {
     error NotEnoughTokenBalance();
     error InsuranceAlreadyRequested();
     error ReimburesementRequirementNotMet();
+    error EndDateEarlierThanStartDate();
+    error InsuranceInActivePeriod();
 }
