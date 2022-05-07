@@ -15,7 +15,7 @@ export const TabSelector = ({ walletConnected }) => {
       case "Pool":
         return <Pool />;
       default:
-        return walletConnected ? <NoWalletDashboard /> : <WalletDashboard />;
+        return !walletConnected ? <NoWalletDashboard /> : <WalletDashboard />;
     }
   };
   return (

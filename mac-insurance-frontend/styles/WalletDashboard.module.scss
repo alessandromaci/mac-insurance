@@ -5,9 +5,56 @@
   min-width: $small;
   margin: $space-large auto;
   display: flex;
-  padding: $space-normal;
-  background-color: $green;
-  color: $extraDark;
+  padding: $space-mega;
+  background-color: $dark;
   border-radius: $x4;
   flex: 1;
+  flex-direction: column;
+}
+
+.tabHeader {
+  font-size: 28px;
+  margin: 0 0 $x2 0;
+}
+
+.dataContainer {
+  max-height: 380px;
+  overflow: scroll;
+}
+
+.tableHead {
+  text-align: left;
+  padding: $x1 0;
+  font-size: 18px;
+  font-weight: 100;
+  width: 160px;
+  margin: 0;
+}
+
+.tableRow {
+  display: flex;
+  align-items: center;
+}
+
+.data {
+  text-align: left;
+  padding: $x1 0;
+  font-size: 14px;
+  font-weight: 100;
+  width: 160px;
+  margin: 0;
+}
+
+.dataButton {
+  background-color: transparent;
+  border: none;
+  color: $green;
+  font-size: 16px;
+  font-weight: 300;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.6;
+  }
 }
