@@ -31,14 +31,11 @@ const dummyData = [
   },
 ];
 
-const reimburse = () => {
-  // Do reimburse stuff
-  console.log("reimburse");
-};
 export const WalletDashboard = () => {
   const [showModal, setShowModal] = useState(false);
 
-  const notify = () =>
+  const reimburse = () => {
+    // Do reimburse stuff
     toast.success("You received your reimbursement!", {
       position: "top-right",
       autoClose: 5000,
@@ -49,6 +46,8 @@ export const WalletDashboard = () => {
       progress: undefined,
       theme: "dark",
     });
+  };
+
   return (
     <div className={s.container}>
       <h3 className={s.tabHeader}>Your positions</h3>
@@ -68,10 +67,9 @@ export const WalletDashboard = () => {
                 <p className={s.data}>{item.balance}</p>
                 <p className={s.data}>{item.expiry}</p>
                 <div className={s.data}>
-                  <button onClick={notify} className={s.dataButton}>
+                  <button onClick={reimburse} className={s.dataButton}>
                     Reimburse
                   </button>
-                  <ToastContainer />
                 </div>
                 <div className={s.data}>
                   <button
@@ -96,6 +94,7 @@ export const WalletDashboard = () => {
           ))}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
