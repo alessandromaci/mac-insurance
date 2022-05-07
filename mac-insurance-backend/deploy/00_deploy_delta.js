@@ -8,10 +8,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const UNI_ADDRESS = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
     const randomAddress = "0x973c877d5636e5cc6e15533ec440d52f299cdf9b";
 
-    log(`Deploying Delta...`);
+    log(`Deploying Mac...`);
     log(`Deployer: ${deployer}`);
 
-    const delta = await deploy("DeltaInsurancePool", {
+    const mac = await deploy("MacInsuranceMain", {
       from: deployer,
       log: true,
       //ERC20uni, uni-usd price feed
@@ -21,9 +21,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       ],
     });
 
-    log(`The contract address is ${delta.address}.`);
+    log(`The contract address is ${mac.address}.`);
 
-    const deltaObject = await ethers.getContractFactory("DeltaInsurancePool");
+    const macObject = await ethers.getContractFactory("MacInsuranceMain");
 
     const accounts = await hre.ethers.getSigners();
     const signer1 = accounts[0];
@@ -71,19 +71,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
       uni
     );
-    const receipt1 = await uniContractWithSigner1.approve(delta.address, uni2);
+    const receipt1 = await uniContractWithSigner1.approve(mac.address, uni2);
 
-    const deltaContract = new ethers.Contract(
-      delta.address,
-      deltaObject.interface,
+    const macContract = new ethers.Contract(
+      mac.address,
+      macObject.interface,
       signer1
     );
 
-    const priceFeed = await deltaContract.getLatestPrice();
+    const priceFeed = await macContract.getLatestPrice();
 
-    const txInit = await deltaContract.initPool(3, 3);
+    const txInit = await macContract.initPool(3, 3);
 
-    const txSupply = await deltaContract.supplyPool(0, uni);
+    const txSupply = await macContract.supplyPool(0, uni);
 
     log(`This is the price feed ${priceFeed}`);
   }

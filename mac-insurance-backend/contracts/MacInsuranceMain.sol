@@ -8,8 +8,8 @@ import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract DeltaInsurancePool {
-    uint16 internal id = 0;
+contract MacInsuranceMain {
+    uint16 internal id;
     address tokenAddress;
     AggregatorV3Interface internal priceFeed;
     IERC20 internal insuredToken;
@@ -30,7 +30,6 @@ contract DeltaInsurancePool {
     );
     event PoolLiquidityAdded(
         uint16 poolId,
-        address tokenAddress,
         address liquidityProvider,
         uint256 liquidityAdded
     );
@@ -42,11 +41,8 @@ contract DeltaInsurancePool {
         uint128 fee
     );
 
-    // maybe best to move this inputs in the init pool functions so that we avoid everytime to deploy a new contract
-    constructor(address _tokenAddress, address _priceFeed) {
-        priceFeed = AggregatorV3Interface(_priceFeed);
-        insuredToken = IERC20(_tokenAddress);
-        tokenAddress = _tokenAddress;
+    constructor() {
+        id = 0;
     }
 
     function getLatestPrice() public view returns (int256) {
@@ -87,13 +83,18 @@ contract DeltaInsurancePool {
         return reimbursementAmount;
     }
 
-    function initPool(int256 _insuranceLossCoverage, uint8 _fee, uint32 _startDateFromDeployInDays, uint32 _endDateFromDeployInDays)
+    function initPool(address _tokenAddress, address _priceFeed, int256 _insuranceLossCoverage, uint8 _fee, uint32 _startDateFromDeployInDays, uint32 _endDateFromDeployInDays)
         public
         returns (DataTypes.PoolData memory)
     {       
+        // initiating the required variable for the ERC20 transfers
+        priceFeed = AggregatorV3Interface(_priceFeed);
+        insuredToken = IERC20(_tokenAddress);
+        tokenAddress = _tokenAddress;
+
+        // time inputs created and checck that start date is not later than future
         uint startDate = block.timestamp + _startDateFromDeployInDays * 1 days;
         uint endDate = block.timestamp + _endDateFromDeployInDays * 1 days;
-
         if (endDate <= startDate) {
             revert Errors.EndDateEarlierThanStartDate();
         }
@@ -152,7 +153,7 @@ contract DeltaInsurancePool {
 
         liquiditySupplyList[_id] = poolSupply;
 
-        emit PoolLiquidityAdded(_id, tokenAddress, msg.sender, _amount);
+        emit PoolLiquidityAdded(_id, msg.sender, _amount);
 
         return (poolDataList[_id].totalLiquidity);
     }
