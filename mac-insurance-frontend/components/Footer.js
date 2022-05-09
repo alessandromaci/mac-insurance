@@ -4,7 +4,7 @@ import { FaHeart, FaCoffee } from "react-icons/fa";
 export const Footer = () => {
   const SHAN_HANDLE = "shan8851";
   const SHAN_LINK = `https://twitter.com/${SHAN_HANDLE}`;
-  const ALEX_HANDLE = "shan8851";
+  const ALEX_HANDLE = "alerex_eth";
   const ALEX_LINK = `https://twitter.com/${ALEX_HANDLE}`;
   return (
     <footer className={s.footer}>
@@ -18,7 +18,7 @@ export const Footer = () => {
           href={SHAN_LINK}
         >
           {"  "} @Shan8851
-        </a>
+        </a>{" "}
         &
         <a
           target="_blank"
@@ -26,7 +26,7 @@ export const Footer = () => {
           className={s.footerLink}
           href={ALEX_LINK}
         >
-          {"  "} @Alex
+          {"  "} @Alerex
         </a>
       </p>
     </footer>

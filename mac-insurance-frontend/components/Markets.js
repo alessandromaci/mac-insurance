@@ -41,7 +41,7 @@ export const Markets = () => {
   };
   return (
     <div className={s.container}>
-      <h3 className={s.tabHeader}>Your positions</h3>
+      <h3 className={s.tabHeader}>Open Insurance Pools</h3>
       <div>
         <div className={s.tableRow}>
           <p className={s.tableHead}>Assets</p>
