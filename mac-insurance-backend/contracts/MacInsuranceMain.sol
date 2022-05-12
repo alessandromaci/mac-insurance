@@ -65,10 +65,10 @@ contract MacInsuranceMain {
     {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
         uint16 fee = poolDataList[_id].fee;
-        uint256 f = totalLiquidity / uint256(fee);
+        uint256 f = totalLiquidity * uint256(fee) / 100;
 
         // userFee = (amountToInsure / TVL) * max fee
-        uint256 userFee = (_amount / totalLiquidity) / f;
+        uint256 userFee = _amount * f / totalLiquidity;
         return userFee;
     }
 
@@ -78,9 +78,9 @@ contract MacInsuranceMain {
         returns (uint256)
     {
         uint256 priceLossCover = poolDataList[_id].priceLossCover;
-        int256 insuranceTreshold = poolDataList[_id].insuranceTreshold;
-        uint256 reimbursementAmount = (_amount / priceLossCover) /
-            uint256(insuranceTreshold);
+        int256 insuranceTreshold = (poolDataList[_id].insuranceTreshold);
+        uint256 reimbursementAmount = ((_amount / priceLossCover) /
+            uint256(insuranceTreshold)) * 10**10;
         return reimbursementAmount;
     }
 
@@ -162,9 +162,6 @@ contract MacInsuranceMain {
 
     function requestInsurance(uint16 _id, uint256 _amount) public {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
-        if (_amount > totalLiquidity) {
-            revert Errors.NotEnoughInsuranceLiquidity();
-        }
 
         if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
@@ -184,6 +181,10 @@ contract MacInsuranceMain {
         // calculating the fee and reimbursement amount
         uint256 feeAmount = getUserFee(_id, _amount);
         uint256 reimbursementAmount = getReimbursement(_id, _amount);
+        if (reimbursementAmount > totalLiquidity) {
+            revert Errors.NotEnoughInsuranceLiquidity();
+        }
+
         insuredToken.transferFrom(msg.sender, address(this), feeAmount);
 
         insuranceRequest.id = _id;
