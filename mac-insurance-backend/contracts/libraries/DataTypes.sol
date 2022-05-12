@@ -18,6 +18,10 @@ library DataTypes {
         int256 insuranceTreshold;
         // the percentage of fee to require this pool insurance
         uint8 fee;
+        // beginning of insurance active period
+        uint startDate;
+        // end of insurance active period
+        uint endDate;
     }
 
     struct PoolLiquiditySupply {
