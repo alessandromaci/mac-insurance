@@ -20,27 +20,23 @@ contract Test_MacInsuranceMain {
     mapping(uint16 => mapping(address => DataTypes.InsuranceRequest))
         public insuranceRequests;
 
-    event PoolCreated(
+    event PoolUpdated(
         uint16 poolId,
         address tokenAddress,
-        address owner,
         int256 basePrice,
         int256 tresholdPrice,
         uint8 fee,
-        uint startDate, 
-        uint endDate
+        uint256 liquidityAdded,
+        uint256 startDate, 
+        uint256 endDate
     );
-    event PoolLiquidityAdded(
-        uint16 poolId,
-        address liquidityProvider,
-        uint256 liquidityAdded
-    );
+
     event InsuranceRequestCreated(
         uint16 poolId,
         address tokenAddress,
         address insuranceRequester,
         uint256 liquidtyToInsure,
-        uint128 fee
+        uint256 fee
     );
 
     constructor() {
@@ -123,13 +119,13 @@ contract Test_MacInsuranceMain {
         // make the pool traceable by adding it in the mapping
         poolDataList[id] = pool;
 
-        emit PoolCreated(
+        emit PoolUpdated(
             id,
             tokenAddress,
-            msg.sender,
             tokenPrice,
             insuranceTreshold,
             _fee, 
+            0,
             startDate,
             endDate
         );
@@ -160,7 +156,16 @@ contract Test_MacInsuranceMain {
 
         liquiditySupplyList[_id] = poolSupply;
 
-        emit PoolLiquidityAdded(_id, msg.sender, _amount);
+        emit PoolUpdated(
+            _id,
+            poolDataList[_id].tokenAddress,
+            poolDataList[_id].basePrice,
+            poolDataList[_id].insuranceTreshold,
+            poolDataList[_id].fee, 
+            poolDataList[_id].totalLiquidity,
+            poolDataList[_id].startDate,
+            poolDataList[_id].endDate
+        );
 
         return (poolDataList[_id].totalLiquidity);
     }
@@ -199,6 +204,14 @@ contract Test_MacInsuranceMain {
         insuranceRequest.fee = feeAmount;
 
         insuranceRequests[_id][msg.sender] = insuranceRequest;
+
+        emit InsuranceRequestCreated (
+            _id,
+            poolDataList[_id].tokenAddress,
+            msg.sender,
+            _amount,
+            feeAmount
+        );
     }
 
     function requestReimbursement(uint16 _id) public {
