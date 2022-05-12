@@ -37,6 +37,10 @@ module.exports = {
         enabled: true,
       },
     },
+    rinkeby: {
+      url: process.env.ALCHEMY_RINKEBY_URL || "",
+      accounts: [process.env.PRIVATE_KEY],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

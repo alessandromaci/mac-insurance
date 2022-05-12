@@ -15,10 +15,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       from: deployer,
       log: true,
       //ERC20uni, uni-usd price feed
-      args: [
-        "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-        "0x553303d460EE0afB37EdFf9bE42922D8FF63220e",
-      ],
     });
 
     log(`The contract address is ${mac.address}.`);
@@ -64,14 +60,18 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const uniContractWithSigner = uniContract.connect(signer);
     const uniContractWithSigner1 = uniContract.connect(signer1);
 
-    const uni = ethers.utils.parseUnits("3", 18);
-    const uni2 = ethers.utils.parseUnits("5", 18);
+    const uniSmall = ethers.utils.parseUnits("1", 18);
+    const uniMedium = ethers.utils.parseUnits("5", 18);
+    const uniLarge = ethers.utils.parseUnits("9", 18);
 
     const receipt = await uniContractWithSigner.transfer(
       "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
-      uni
+      uniLarge
     );
-    const receipt1 = await uniContractWithSigner1.approve(mac.address, uni2);
+    const receipt1 = await uniContractWithSigner1.approve(
+      mac.address,
+      uniLarge
+    );
 
     const macContract = new ethers.Contract(
       mac.address,
@@ -79,12 +79,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       signer1
     );
 
-    const priceFeed = await macContract.getLatestPrice();
+    const txInit = await macContract.initPool(
+      "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "0x553303d460EE0afB37EdFf9bE42922D8FF63220e",
+      10,
+      3,
+      1,
+      15
+    );
 
-    const txInit = await macContract.initPool(3, 3);
+    const txSupply = await macContract.supplyPool(0, uniSmall);
+    const txRequestInsurance = await macContract.requestInsurance(0, uniMedium);
 
-    const txSupply = await macContract.supplyPool(0, uni);
-
-    log(`This is the price feed ${priceFeed}`);
+    const poolDetails = await macContract.poolDataList(0);
+    log(poolDetails);
   }
 };

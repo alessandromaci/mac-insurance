@@ -9,7 +9,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MacInsuranceMain {
-    uint16 internal id;
+    uint16 public id;
     address tokenAddress;
     AggregatorV3Interface internal priceFeed;
     IERC20 internal insuredToken;
@@ -25,6 +25,7 @@ contract MacInsuranceMain {
         address owner,
         int256 basePrice,
         int256 tresholdPrice,
+        uint8 fee,
         uint startDate, 
         uint endDate
     );
@@ -45,7 +46,7 @@ contract MacInsuranceMain {
         id = 0;
     }
 
-    function getLatestPrice() public view returns (int256) {
+    function getLatestPrice() internal view returns (int256) {
         (
             ,
             /*uint80 roundID*/
@@ -83,7 +84,7 @@ contract MacInsuranceMain {
         return reimbursementAmount;
     }
 
-    function initPool(address _tokenAddress, address _priceFeed, int256 _insuranceLossCoverage, uint8 _fee, uint32 _startDateFromDeployInDays, uint32 _endDateFromDeployInDays)
+    function initPool(address _tokenAddress, address _priceFeed, int256 _insuranceLossCoverage, uint8 _fee, uint256 _startDateFromDeployInSeconds, uint256 _endDateFromDeployInSeconds)
         public
         returns (DataTypes.PoolData memory)
     {       
@@ -93,8 +94,8 @@ contract MacInsuranceMain {
         tokenAddress = _tokenAddress;
 
         // time inputs created and checck that start date is not later than future
-        uint startDate = block.timestamp + _startDateFromDeployInDays * 1 days;
-        uint endDate = block.timestamp + _endDateFromDeployInDays * 1 days;
+        uint startDate = block.timestamp + _startDateFromDeployInSeconds * 1 seconds;
+        uint endDate = block.timestamp + _endDateFromDeployInSeconds * 1 seconds;
         if (endDate <= startDate) {
             revert Errors.EndDateEarlierThanStartDate();
         }
@@ -122,7 +123,8 @@ contract MacInsuranceMain {
             tokenAddress,
             msg.sender,
             tokenPrice,
-            insuranceTreshold, 
+            insuranceTreshold,
+            _fee, 
             startDate,
             endDate
         );
@@ -137,7 +139,7 @@ contract MacInsuranceMain {
             revert Errors.PoolIdNotCreated();
         }
 
-        if (block.timestamp <= poolDataList[_id].startDate) {
+        if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
         }
 
@@ -158,13 +160,13 @@ contract MacInsuranceMain {
         return (poolDataList[_id].totalLiquidity);
     }
 
-    function requestInsurance(uint16 _id, uint32 _amount) public {
+    function requestInsurance(uint16 _id, uint256 _amount) public {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
         if (_amount > totalLiquidity) {
-            revert Errors.NotEnoughLiquidity();
+            revert Errors.NotEnoughInsuranceLiquidity();
         }
 
-        if (block.timestamp <= poolDataList[_id].startDate) {
+        if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
         }
 
@@ -194,6 +196,15 @@ contract MacInsuranceMain {
     }
 
     function requestReimbursement(uint16 _id) public {
+
+        if (block.timestamp <= poolDataList[_id].startDate) {
+            revert Errors.InsuranceInActivePeriod();
+        }
+
+        if (block.timestamp > poolDataList[_id].endDate) {
+            revert Errors.InsuranceInActivePeriod();
+        }        
+
         int256 tokenPrice = getLatestPrice();
         if (tokenPrice < poolDataList[_id].insuranceTreshold) {
             revert Errors.ReimburesementRequirementNotMet();
