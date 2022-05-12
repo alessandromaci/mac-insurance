@@ -2,14 +2,15 @@
 
 pragma solidity ^0.8.10;
 
-import {DataTypes} from "./libraries/DataTypes.sol";
-import {Errors} from "./libraries/Errors.sol";
+import {DataTypes} from "../libraries/DataTypes.sol";
+import {Errors} from "../libraries/Errors.sol";
 import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract MacInsuranceMain {
+contract Test_MacInsuranceMain {
     uint16 public id;
+    int256 public testTokenPrice = 1000000000;
     address tokenAddress;
     AggregatorV3Interface internal priceFeed;
     IERC20 internal insuredToken;
@@ -58,6 +59,10 @@ contract MacInsuranceMain {
         return price;
     }
 
+    function updatePriceToken(int256 _updatedPrice) public {
+        testTokenPrice = _updatedPrice;
+    }
+
     function getUserFee(uint16 _id, uint256 _amount)
         internal
         view
@@ -65,10 +70,10 @@ contract MacInsuranceMain {
     {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
         uint16 fee = poolDataList[_id].fee;
-        uint256 f = totalLiquidity / uint256(fee);
+        uint256 f = totalLiquidity * uint256(fee) / 100;
 
         // userFee = (amountToInsure / TVL) * max fee
-        uint256 userFee = (_amount / totalLiquidity) / f;
+        uint256 userFee = _amount * f / totalLiquidity;
         return userFee;
     }
 
@@ -78,9 +83,9 @@ contract MacInsuranceMain {
         returns (uint256)
     {
         uint256 priceLossCover = poolDataList[_id].priceLossCover;
-        int256 insuranceTreshold = poolDataList[_id].insuranceTreshold;
-        uint256 reimbursementAmount = (_amount / priceLossCover) /
-            uint256(insuranceTreshold);
+        int256 insuranceTreshold = (poolDataList[_id].insuranceTreshold);
+        uint256 reimbursementAmount = ((_amount / priceLossCover) /
+            uint256(insuranceTreshold)) * 10**10;
         return reimbursementAmount;
     }
 
@@ -102,7 +107,7 @@ contract MacInsuranceMain {
         
         DataTypes.PoolData memory pool;
         // retrieving the token price from the oracle
-        int256 tokenPrice = getLatestPrice();
+        int256 tokenPrice = testTokenPrice;
         int256 insuranceTreshold = tokenPrice -
             ((tokenPrice / 100) * _insuranceLossCoverage);
 
@@ -162,9 +167,6 @@ contract MacInsuranceMain {
 
     function requestInsurance(uint16 _id, uint256 _amount) public {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
-        if (_amount > totalLiquidity) {
-            revert Errors.NotEnoughInsuranceLiquidity();
-        }
 
         if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
@@ -184,6 +186,10 @@ contract MacInsuranceMain {
         // calculating the fee and reimbursement amount
         uint256 feeAmount = getUserFee(_id, _amount);
         uint256 reimbursementAmount = getReimbursement(_id, _amount);
+        if (reimbursementAmount > totalLiquidity) {
+            revert Errors.NotEnoughInsuranceLiquidity();
+        }
+
         insuredToken.transferFrom(msg.sender, address(this), feeAmount);
 
         insuranceRequest.id = _id;
@@ -205,7 +211,7 @@ contract MacInsuranceMain {
             revert Errors.InsuranceInActivePeriod();
         }        
 
-        int256 tokenPrice = getLatestPrice();
+        int256 tokenPrice = testTokenPrice;
         if (tokenPrice > poolDataList[_id].insuranceTreshold) {
             revert Errors.ReimburesementRequirementNotMet();
         }
