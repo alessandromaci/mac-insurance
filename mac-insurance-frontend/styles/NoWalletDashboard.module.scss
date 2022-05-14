@@ -1,0 +1,20 @@
+@import "./colors";
+@import "./variables";
+
+.container {
+  min-width: $small;
+  margin: $space-large auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $dark;
+  border-radius: $x4;
+  flex: 1;
+  padding: $space-normal;
+}
+
+.text {
+  font-size: 24px;
+  max-width: 60%;
+  text-align: center;
+}

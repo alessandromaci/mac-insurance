@@ -1,0 +1,12 @@
+@import "./colors";
+@import "./variables";
+
+.container {
+  min-width: $small;
+  margin: $space-large auto;
+  display: flex;
+  padding: $space-normal;
+  background-color: $dark;
+  border-radius: $x4;
+  flex: 1;
+}

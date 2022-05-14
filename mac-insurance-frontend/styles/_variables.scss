@@ -1,0 +1,20 @@
+$size-unit: 8px;
+$x1: $size-unit;
+$x2: $size-unit * 2;
+$x3: $size-unit * 3;
+$x4: $size-unit * 4;
+$x5: $size-unit * 5;
+$x6: $size-unit * 6;
+$x8: $size-unit * 8;
+
+$space-nano: $size-unit;
+$space-normal: $size-unit * 2;
+$space-large: $size-unit * 3;
+$space-mega: $size-unit * 4;
+$space-huge: $size-unit * 8;
+$space-super: $size-unit * 16;
+
+$phone: 640px;
+$tablet: 768px;
+$small: 900px;
+$desktop: 1200px;
