@@ -27,7 +27,7 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
       from: address,
       to: macContractAddress,
       data: macContractInstance.methods
-        .requestInsurance(placeId, amount)
+        .requestInsurance(pool.poolId, amount)
         .encodeABI(),
     };
 
