@@ -27,6 +27,7 @@ export const Markets = () => {
   const [showSupplyModal, setShowSupplyModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [modalData, setModalData] = useState();
+  const [modalPoolData, setModalPoolData] = useState();
 
   // Query the list of created pools from the subgraph
   const {
@@ -66,16 +67,18 @@ export const Markets = () => {
       default:
         break;
     }
-    return tokenData.logo;
+    return tokenData;
   };
 
   const handleSupplyModal = (data) => {
     setModalData(data);
+
     setShowSupplyModal(true);
   };
 
-  const handleRequestModal = (data) => {
+  const handleRequestModal = (data, pool) => {
     setModalData(data);
+    setModalPoolData(pool);
     setShowRequestModal(true);
   };
   return (
@@ -93,10 +96,11 @@ export const Markets = () => {
               <div className={s.tableRow}>
                 <div className={s.data}>
                   <Image
-                    src={retrieveTokenData(item.tokenAddress)}
+                    src={retrieveTokenData(item.tokenAddress).logo}
                     width={30}
                     height={30}
                   />
+                  <p>{retrieveTokenData(item.tokenAddress).name}</p>
                 </div>
                 <p className={s.data}>
                   {`${calculateLossPercentage(
@@ -115,7 +119,12 @@ export const Markets = () => {
                 </div>
                 <div className={s.data}>
                   <button
-                    onClick={() => handleRequestModal(item)}
+                    onClick={() =>
+                      handleRequestModal(
+                        retrieveTokenData(item.tokenAddress),
+                        item
+                      )
+                    }
                     className={s.dataButton}
                   >
                     Request
@@ -135,6 +144,7 @@ export const Markets = () => {
         onClose={() => setShowRequestModal(false)}
         show={showRequestModal}
         item={modalData}
+        pool={modalPoolData}
       />
     </div>
   );

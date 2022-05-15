@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@alch/alchemy-web3": "^1.4.2",
     "@apollo/client": "^3.6.2",
     "@chakra-ui/react": "^1.8.8",
     "@coinbase/wallet-sdk": "^3.0.11",
