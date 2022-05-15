@@ -1,42 +1,84 @@
 import s from "../styles/Markets.module.scss";
 import ethLogo from "../public/ethLogo.png";
+import daiLogo from "../public/dai-logo.png";
 import btcLogo from "../public/bitcoin.svg";
 import { useState } from "react";
 import Image from "next/image";
 import { SupplyModal } from "./modals/SupplyModal";
 import { RequestModal } from "./modals/RequestModal";
+import { gql, useQuery } from "@apollo/client";
 
-const dummyData = [
-  {
-    logo: btcLogo,
-    asset: "BTC",
-    cover: "10% (< $2,700)",
-    fee: "5%",
-    insuranceFee: 0.13,
-    price: 2.8,
-  },
-  {
-    logo: ethLogo,
-    asset: "ETH",
-    cover: "10% (< $2,700)",
-    fee: "5%",
-    insuranceFee: 0.03,
-    price: 2.15,
-  },
-];
+const GET_OPEN_POOLS = gql`
+  query {
+    poolEntities(first: 5, where: { state: "created" }) {
+      createdAtTimestamp
+      poolId
+      tokenAddress
+      basePrice
+      tresholdPrice
+      feePercentage
+      startDate
+      endDate
+    }
+  }
+`;
 
 export const Markets = () => {
   const [showSupplyModal, setShowSupplyModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [modalData, setModalData] = useState();
+  const [modalPoolData, setModalPoolData] = useState();
+
+  // Query the list of created pools from the subgraph
+  const {
+    loading: poolsLoading,
+    error: poolsError,
+    data: poolsData,
+  } = useQuery(GET_OPEN_POOLS);
+
+  const pools = poolsData?.poolEntities;
+  console.log(pools);
+
+  // This is an helper function to get the cover loss percentage. Maybe we can move this operation to the query as well
+  const calculateLossPercentage = (tresholdPrice, basePrice) => {
+    const difference = basePrice - tresholdPrice;
+    return ((difference * 100) / basePrice).toFixed(2);
+  };
+
+  // Other helper function to retrieve the right logo based on the address. Noticed a very weird behaviour where the token address letters gets changed between lower and capital. Super weird! Temporarily treating both difference like this.
+  const retrieveTokenData = (tokenAddress) => {
+    const tokenData = {
+      name: "",
+      logo: "",
+    };
+    switch (tokenAddress) {
+      case "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735":
+        tokenData.name = "DAI";
+        tokenData.logo = daiLogo;
+        break;
+      case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
+        tokenData.name = "DAI";
+        tokenData.logo = daiLogo;
+        break;
+      case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
+        tokenData.name = "WETH";
+        tokenData.logo = ethLogo;
+        break;
+      default:
+        break;
+    }
+    return tokenData;
+  };
 
   const handleSupplyModal = (data) => {
     setModalData(data);
+
     setShowSupplyModal(true);
   };
 
-  const handleRequestModal = (data) => {
+  const handleRequestModal = (data, pool) => {
     setModalData(data);
+    setModalPoolData(pool);
     setShowRequestModal(true);
   };
   return (
@@ -45,18 +87,28 @@ export const Markets = () => {
       <div>
         <div className={s.tableRow}>
           <p className={s.tableHead}>Assets</p>
-          <p className={s.tableHead}>Balance</p>
-          <p className={s.tableHead}>Expiry Period</p>
+          <p className={s.tableHead}>Price Loss %</p>
+          <p className={s.tableHead}>Fee %</p>
         </div>
         <div className={s.dataContainer}>
-          {dummyData.map((item, index) => (
+          {pools?.map((item, index) => (
             <div key={index}>
               <div className={s.tableRow}>
                 <div className={s.data}>
-                  <Image src={item.logo} width={30} height={30} />
+                  <Image
+                    src={retrieveTokenData(item.tokenAddress).logo}
+                    width={30}
+                    height={30}
+                  />
+                  <p>{retrieveTokenData(item.tokenAddress).name}</p>
                 </div>
-                <p className={s.data}>{item.cover}</p>
-                <p className={s.data}>{item.fee}</p>
+                <p className={s.data}>
+                  {`${calculateLossPercentage(
+                    item.tresholdPrice,
+                    item.basePrice
+                  )} % (< $${item.tresholdPrice / 10 ** 8})`}
+                </p>
+                <p className={s.data}>{item.feePercentage} %</p>
                 <div className={s.data}>
                   <button
                     onClick={() => handleSupplyModal(item)}
@@ -67,7 +119,12 @@ export const Markets = () => {
                 </div>
                 <div className={s.data}>
                   <button
-                    onClick={() => handleRequestModal(item)}
+                    onClick={() =>
+                      handleRequestModal(
+                        retrieveTokenData(item.tokenAddress),
+                        item
+                      )
+                    }
                     className={s.dataButton}
                   >
                     Request
@@ -87,6 +144,7 @@ export const Markets = () => {
         onClose={() => setShowRequestModal(false)}
         show={showRequestModal}
         item={modalData}
+        pool={modalPoolData}
       />
     </div>
   );
