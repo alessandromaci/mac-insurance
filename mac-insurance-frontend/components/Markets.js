@@ -70,9 +70,9 @@ export const Markets = () => {
     return tokenData;
   };
 
-  const handleSupplyModal = (data) => {
+  const handleSupplyModal = (data, pool) => {
     setModalData(data);
-
+    setModalPoolData(pool);
     setShowSupplyModal(true);
   };
 
@@ -111,7 +111,12 @@ export const Markets = () => {
                 <p className={s.data}>{item.feePercentage} %</p>
                 <div className={s.data}>
                   <button
-                    onClick={() => handleSupplyModal(item)}
+                    onClick={() =>
+                      handleSupplyModal(
+                        retrieveTokenData(item.tokenAddress),
+                        item
+                      )
+                    }
                     className={s.dataButton}
                   >
                     Supply
@@ -139,6 +144,7 @@ export const Markets = () => {
         onClose={() => setShowSupplyModal(false)}
         show={showSupplyModal}
         item={modalData}
+        pool={modalPoolData}
       />
       <RequestModal
         onClose={() => setShowRequestModal(false)}

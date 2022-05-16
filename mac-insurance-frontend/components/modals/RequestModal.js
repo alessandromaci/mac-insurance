@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import ReactDOM from "react-dom";
 import s from "../../styles/MarketsModal.module.scss";
 import MacInsurance from "../../abis/MacInsuranceMain.json";
 
-// to move this value in a env file
-const alchemyKey =
-  "https://eth-rinkeby.alchemyapi.io/v2/eHE1jX6Aksdxa1oTvMddTHeKQsIeRuHa";
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 const macContractAddress = MacInsurance.address;
@@ -24,15 +23,16 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
 
   const requestInsurance = async () => {
     const transactionParams = {
-      from: address,
+      // Hardcoded address for testing
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
       to: macContractAddress,
       data: macContractInstance.methods
-        .requestInsurance(pool.poolId, amount)
+        .requestInsurance(pool.poolId, ethers.utils.parseEther(amount))
         .encodeABI(),
     };
 
     try {
-      const tx = await web3.eth.sendTransaction(transactionParams);
+      await web3.eth.sendTransaction(transactionParams);
     } catch (err) {
       console.log("err: ", err);
     }
