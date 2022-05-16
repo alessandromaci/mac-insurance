@@ -64,6 +64,10 @@ export const Markets = () => {
         tokenData.name = "WETH";
         tokenData.logo = ethLogo;
         break;
+      case "0xc778417e063141139fce010982780140aa0cd5ab":
+        tokenData.name = "WETH";
+        tokenData.logo = ethLogo;
+        break;
       default:
         break;
     }

@@ -3,26 +3,46 @@ import { ethers } from "ethers";
 import ReactDOM from "react-dom";
 import s from "../../styles/MarketsModal.module.scss";
 import MacInsurance from "../../abis/MacInsuranceMain.json";
+import ERC20 from "../../abis/TokenMain.json";
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 const macContractAddress = MacInsurance.address;
-const macContractInstance = new web3.eth.Contract(
-  MacInsurance.abi,
-  macContractAddress
-);
 
 export const SupplyModal = ({ item, pool, show, onClose }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
+
+  // Step 0: Creating contract instance
+  const macContractInstance = new web3.eth.Contract(
+    MacInsurance.abi,
+    macContractAddress
+  );
+
+  const tokenContractInstance = new web3.eth.Contract(
+    ERC20.abi,
+    //to be changed
+    "0xc778417E063141139Fce010982780140Aa0cD5Ab"
+  );
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
   };
 
   const supplyInsurance = async () => {
-    const transactionParams = {
+    // Step 1: Call the ERC20 contract to approve the transfer of tokens
+    const approveTokenTransactionParams = {
+      // Hardcoded address for testing
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
+      to: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+      data: tokenContractInstance.methods
+        .approve(macContractAddress, ethers.utils.parseEther(amount))
+        .encodeABI(),
+    };
+
+    // Step 2: Call the main contract to supply insurance.
+    const supplyInsuranceTransactionParams = {
       // Hardcoded address for testing
       from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
       to: macContractAddress,
@@ -32,7 +52,8 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
     };
 
     try {
-      await web3.eth.sendTransaction(transactionParams);
+      await web3.eth.sendTransaction(approveTokenTransactionParams);
+      await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
     } catch (err) {
       console.log("err: ", err);
     }
