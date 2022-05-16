@@ -22,4 +22,44 @@
   align-items: center;
   flex-direction: column;
   margin: auto;
+  min-width: $small;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: $phone;
+  margin-bottom: $x2;
+}
+
+.rowLabel {
+  width: 45%;
+}
+
+.inputWithPreview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lossPreviewText {
+  margin-left: $x2;
+}
+
+.poolSummary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.summaryHeading {
+  font-size: 18px;
+  margin: 0;
+}
+
+.summaryLiquidity {
+  font-size: 32px;
+  margin: $x2 0;
 }
