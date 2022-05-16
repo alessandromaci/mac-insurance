@@ -7,6 +7,7 @@ import Image from "next/image";
 import { SupplyModal } from "./modals/SupplyModal";
 import { RequestModal } from "./modals/RequestModal";
 import { gql, useQuery } from "@apollo/client";
+import { ethers } from "ethers";
 
 const GET_OPEN_POOLS = gql`
   query {
@@ -37,7 +38,6 @@ export const Markets = () => {
   } = useQuery(GET_OPEN_POOLS);
 
   const pools = poolsData?.poolEntities;
-  console.log(pools);
 
   // This is an helper function to get the cover loss percentage. Maybe we can move this operation to the query as well
   const calculateLossPercentage = (tresholdPrice, basePrice) => {
@@ -45,26 +45,19 @@ export const Markets = () => {
     return ((difference * 100) / basePrice).toFixed(2);
   };
 
-  // Other helper function to retrieve the right logo based on the address. Noticed a very weird behaviour where the token address letters gets changed between lower and capital. Super weird! Temporarily treating both difference like this.
+  // Other helper function to retrieve the right logo and name based on the address.
   const retrieveTokenData = (tokenAddress) => {
     const tokenData = {
       name: "",
       logo: "",
     };
-    switch (tokenAddress) {
-      case "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735":
-        tokenData.name = "DAI";
-        tokenData.logo = daiLogo;
-        break;
+    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
+    switch (checkSumAddress) {
       case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
         tokenData.name = "DAI";
         tokenData.logo = daiLogo;
         break;
       case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
-        tokenData.name = "WETH";
-        tokenData.logo = ethLogo;
-        break;
-      case "0xc778417e063141139fce010982780140aa0cd5ab":
         tokenData.name = "WETH";
         tokenData.logo = ethLogo;
         break;
