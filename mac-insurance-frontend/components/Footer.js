@@ -1,11 +1,11 @@
-import s from "../styles/Footer.module.scss";
-import { FaHeart, FaCoffee } from "react-icons/fa";
+import s from "../styles/Footer.module.scss"
+import { FaHeart, FaCoffee } from "react-icons/fa"
 
 export const Footer = () => {
-  const SHAN_HANDLE = "shan8851";
-  const SHAN_LINK = `https://twitter.com/${SHAN_HANDLE}`;
-  const ALEX_HANDLE = "alerex_eth";
-  const ALEX_LINK = `https://twitter.com/${ALEX_HANDLE}`;
+  const SHAN_HANDLE = "shan8851"
+  const SHAN_LINK = `https://twitter.com/${SHAN_HANDLE}`
+  const ALEX_HANDLE = "alerex_eth"
+  const ALEX_LINK = `https://twitter.com/${ALEX_HANDLE}`
   return (
     <footer className={s.footer}>
       <p className={s.footerText}>
@@ -15,20 +15,20 @@ export const Footer = () => {
           target="_blank"
           rel="noreferrer"
           className={s.footerLink}
-          href={SHAN_LINK}
+          href={ALEX_LINK}
         >
-          {"  "} @Shan8851
-        </a>{" "}
+          @Alerex {"  "}
+        </a>
         &
         <a
           target="_blank"
           rel="noreferrer"
           className={s.footerLink}
-          href={ALEX_LINK}
+          href={SHAN_LINK}
         >
-          {"  "} @Alerex
-        </a>
+          {"  "} @Shan8851
+        </a>{" "}
       </p>
     </footer>
-  );
-};
+  )
+}
