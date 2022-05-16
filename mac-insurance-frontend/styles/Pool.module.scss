@@ -10,3 +10,16 @@
   border-radius: $x4;
   flex: 1;
 }
+
+.tabHeader {
+  font-size: 28px;
+  margin: 0 0 $x2 0;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: auto;
+}
