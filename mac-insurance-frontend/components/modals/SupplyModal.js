@@ -14,7 +14,7 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
 
-  // Step 0: Creating contract instance
+  // Step 0: Creating contract instance for mac and ERC20
   const macContractInstance = new web3.eth.Contract(
     MacInsurance.abi,
     macContractAddress
@@ -22,8 +22,7 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
 
   const tokenContractInstance = new web3.eth.Contract(
     ERC20.abi,
-    //to be changed
-    "0xc778417E063141139Fce010982780140Aa0cD5Ab"
+    pool?.tokenAddress
   );
 
   const handleAmountChange = (e) => {
@@ -33,9 +32,8 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
   const supplyInsurance = async () => {
     // Step 1: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
-      // Hardcoded address for testing
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
-      to: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      to: pool?.tokenAddress,
       data: tokenContractInstance.methods
         .approve(macContractAddress, ethers.utils.parseEther(amount))
         .encodeABI(),
@@ -43,8 +41,7 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
 
     // Step 2: Call the main contract to supply insurance.
     const supplyInsuranceTransactionParams = {
-      // Hardcoded address for testing
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
       to: macContractAddress,
       data: macContractInstance.methods
         .supplyPool(pool.poolId, ethers.utils.parseEther(amount))
