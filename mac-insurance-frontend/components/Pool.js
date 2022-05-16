@@ -4,6 +4,7 @@ import Select from "react-select"
 import { Button } from "./Button"
 import ethLogo from "../public/ethLogo.png"
 import daiLogo from "../public/dai-logo.png"
+import Image from "next/image"
 
 export const Pool = () => {
   const [selectedToken, setSelectedToken] = useState(null)
@@ -13,24 +14,6 @@ export const Pool = () => {
     { value: "dai", label: "DAI", img: daiLogo },
   ]
 
-  const customStyles = {
-    option: (provided, state) => ({
-      ...provided,
-      borderBottom: "1px dotted pink",
-      color: state.isSelected ? "red" : "blue",
-      padding: 20,
-    }),
-    control: () => ({
-      // none of react-select's styles are passed to <Control />
-      width: "100%",
-    }),
-    singleValue: (provided, state) => {
-      const opacity = state.isDisabled ? 0.5 : 1
-      const transition = "opacity 300ms"
-
-      return { ...provided, opacity, transition }
-    },
-  }
   return (
     <div className={s.container}>
       <div className={s.wrapper}>
@@ -55,12 +38,13 @@ export const Pool = () => {
               options={tokens}
               formatOptionLabel={(token) => (
                 <div className={s.selectOption}>
-                  <img
-                    className={s.selectImage}
-                    src={token.image}
+                  <Image
+                    src={token.img}
+                    width={25}
+                    height={25}
                     alt="token-image"
                   />
-                  <span>{token.label}</span>
+                  <span className={s.selectLabel}>{token.label}</span>
                 </div>
               )}
               placeholder="Select token..."
