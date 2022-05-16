@@ -86,6 +86,7 @@ export const Markets = () => {
           <p className={s.tableHead}>Price Loss %</p>
           <p className={s.tableHead}>Fee %</p>
         </div>
+        {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
           {pools?.map((item, index) => (
             <div key={index}>

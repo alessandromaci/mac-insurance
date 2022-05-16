@@ -7,6 +7,7 @@ import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";
 import { gql, useQuery } from "@apollo/client";
 import { ethers } from "ethers";
+import MacInsurance from "../abis/MacInsuranceMain.json";
 
 const GET_PROFILE_POOLS = gql`
   query {
@@ -20,30 +21,14 @@ const GET_PROFILE_POOLS = gql`
   }
 `;
 
-const dummyData = [
-  {
-    logo: ethLogo,
-    balance: 0.776,
-    expiry: "24 Sep 2022",
-    asset: "ETH",
-    insuranceDetails: "Ethereum @ 10%",
-    cover: "10% (< $2,700)",
-    fee: "5%",
-    validityPeriod: { from: "05 May 2022", to: "04 Sep 2022" },
-    totalInsured: "11 ETH ($22,000)",
-  },
-  {
-    logo: btcLogo,
-    balance: 1.7,
-    expiry: "17 Nov 2022",
-    asset: "BTC",
-    insuranceDetails: "Ethereum @ 10%",
-    cover: "10% (< $2,700)",
-    fee: "5%",
-    validityPeriod: { from: "05 May 2022", to: "04 Sep 2022" },
-    totalInsured: "11 ETH ($22,000)",
-  },
-];
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const web3 = createAlchemyWeb3(alchemyKey);
+const macContractAddress = MacInsurance.address;
+const macContractInstance = new web3.eth.Contract(
+  MacInsurance.abi,
+  macContractAddress
+);
 
 export const WalletDashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -69,7 +54,6 @@ export const WalletDashboard = () => {
   });
 
   const pools = poolsData?.insuranceRequestEntities;
-  console.log(poolsLoading);
 
   const retrieveTokenData = (tokenAddress) => {
     const tokenData = {
@@ -92,18 +76,32 @@ export const WalletDashboard = () => {
     return tokenData;
   };
 
-  const reimburse = () => {
-    // Do reimburse stuff
-    toast.success("You received your reimbursement!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
+  const reimburse = async (poolId) => {
+    const transactionParams = {
+      // Hardcoded address for testing
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
+      to: macContractAddress,
+      data: macContractInstance.methods
+        .requestReimbursement(poolId)
+        .encodeABI(),
+    };
+
+    try {
+      await web3.eth.sendTransaction(transactionParams);
+      //Do reimburse stuff
+      toast.success("You received your reimbursement!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } catch (err) {
+      console.log("err: ", err);
+    }
   };
 
   return (
@@ -115,6 +113,7 @@ export const WalletDashboard = () => {
           <p className={s.tableHead}>Balance</p>
           <p className={s.tableHead}>Expiry Period</p>
         </div>
+        {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
           {pools?.map((item, index) => (
             <div key={index}>
@@ -132,7 +131,10 @@ export const WalletDashboard = () => {
                 </p>
                 <p className={s.data}>{"tbc"}</p>
                 <div className={s.data}>
-                  <button onClick={reimburse} className={s.dataButton}>
+                  <button
+                    onClick={() => reimburse(item.poolId)}
+                    className={s.dataButton}
+                  >
                     Reimburse
                   </button>
                 </div>
