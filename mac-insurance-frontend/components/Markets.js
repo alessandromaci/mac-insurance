@@ -1,7 +1,6 @@
 import s from "../styles/Markets.module.scss";
 import ethLogo from "../public/ethLogo.png";
 import daiLogo from "../public/dai-logo.png";
-import btcLogo from "../public/bitcoin.svg";
 import { useState } from "react";
 import Image from "next/image";
 import { SupplyModal } from "./modals/SupplyModal";

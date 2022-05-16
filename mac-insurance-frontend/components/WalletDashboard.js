@@ -5,6 +5,20 @@ import btcLogo from "../public/bitcoin.svg";
 import Image from "next/image";
 import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";
+import { gql, useQuery } from "@apollo/client";
+import { ethers } from "ethers";
+
+const GET_PROFILE_POOLS = gql`
+  query {
+    insuranceRequestEntities {
+      createdAtTimestamp
+      poolId
+      tokenAddress
+      feeAmount
+      insuranceLiquidityRequest
+    }
+  }
+`;
 
 const dummyData = [
   {
@@ -40,6 +54,44 @@ export const WalletDashboard = () => {
     setShowModal(true);
   };
 
+  // Query the list of created pools from the subgraph
+  const {
+    loading: poolsLoading,
+    error: poolsError,
+    data: poolsData,
+  } = useQuery(GET_PROFILE_POOLS, {
+    variables: {
+      first: 5,
+      where: {
+        insuranceRequester: "0xfb0ac8078982c876e894e35f5890652886b8c88b", // to be changed once we fethc the user address
+      },
+    },
+  });
+
+  const pools = poolsData?.insuranceRequestEntities;
+  console.log(poolsLoading);
+
+  const retrieveTokenData = (tokenAddress) => {
+    const tokenData = {
+      name: "",
+      logo: "",
+    };
+    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
+    switch (checkSumAddress) {
+      case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
+        tokenData.name = "DAI";
+        tokenData.logo = daiLogo;
+        break;
+      case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
+        tokenData.name = "WETH";
+        tokenData.logo = ethLogo;
+        break;
+      default:
+        break;
+    }
+    return tokenData;
+  };
+
   const reimburse = () => {
     // Do reimburse stuff
     toast.success("You received your reimbursement!", {
@@ -64,14 +116,21 @@ export const WalletDashboard = () => {
           <p className={s.tableHead}>Expiry Period</p>
         </div>
         <div className={s.dataContainer}>
-          {dummyData.map((item, index) => (
+          {pools?.map((item, index) => (
             <div key={index}>
               <div className={s.tableRow}>
                 <div className={s.data}>
-                  <Image src={item.logo} width={30} height={30} />
+                  <Image
+                    src={retrieveTokenData(item.tokenAddress).logo}
+                    width={30}
+                    height={30}
+                  />
+                  <p>{retrieveTokenData(item.tokenAddress).name}</p>
                 </div>
-                <p className={s.data}>{item.balance}</p>
-                <p className={s.data}>{item.expiry}</p>
+                <p className={s.data}>
+                  {item.insuranceLiquidityRequest / 10 ** 18}
+                </p>
+                <p className={s.data}>{"tbc"}</p>
                 <div className={s.data}>
                   <button onClick={reimburse} className={s.dataButton}>
                     Reimburse
