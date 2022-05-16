@@ -25,6 +25,15 @@
   min-width: $small;
 }
 
+.selectOption {
+  display: flex;
+  align-items: center;
+}
+
+.selectImage {
+  margin-right: $x1;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -37,10 +46,15 @@
   width: 45%;
 }
 
+.rowValue {
+  width: 45%;
+}
+
 .inputWithPreview {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  width: 45%;
 }
 
 .lossPreviewText {
@@ -62,4 +76,13 @@
 .summaryLiquidity {
   font-size: 32px;
   margin: $x2 0;
+}
+
+.numInput {
+  padding: $x1;
+  width: 100%;
+  background-color: transparent;
+  color: $text;
+  border: 1px solid $gray;
+  border-radius: $x1;
 }
