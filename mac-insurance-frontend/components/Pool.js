@@ -1,19 +1,44 @@
 import s from "../styles/Pool.module.scss"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Select from "react-select"
 import { Button } from "./Button"
 import ethLogo from "../public/ethLogo.png"
 import daiLogo from "../public/dai-logo.png"
 import Image from "next/image"
+import { addDays, format } from "date-fns"
+import { DateRange, DayPicker } from "react-day-picker"
+import "react-day-picker/dist/style.css"
 
 export const Pool = () => {
   const [selectedToken, setSelectedToken] = useState(null)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [range, setRange] = useState()
+  const [dateRangePicked, setDateRangePicked] = useState(false)
 
   const tokens = [
     { value: "eth", label: "ETH", img: ethLogo },
     { value: "dai", label: "DAI", img: daiLogo },
   ]
 
+  let footer = <p>Please pick the first day.</p>
+  if (range?.from) {
+    if (!range.to) {
+      footer = <p>{format(range.from, "PPP")}</p>
+    } else if (range.to) {
+      footer = (
+        <p>
+          {format(range.from, "PPP")}–{format(range.to, "PPP")}
+        </p>
+      )
+    }
+  }
+
+  useEffect(() => {
+    if (range && range.from && range.to) {
+      setShowDatePicker(false)
+      setDateRangePicked(true)
+    }
+  }, [range])
   return (
     <div className={s.container}>
       <div className={s.wrapper}>
@@ -59,7 +84,7 @@ export const Pool = () => {
               type="number"
               min={0}
               max={100}
-              placeholder="Enter a number between 0-100"
+              placeholder="0%-100%..."
             />
           </div>
         </div>
@@ -71,15 +96,33 @@ export const Pool = () => {
               type="number"
               min={0}
               max={100}
-              placeholder="Enter a number between 0-100"
+              placeholder="0%-100%..."
             />
-            <p className={s.lossPreviewText}>preview</p>
+            <p className={s.lossPreviewText}>{`[<$2357.10]`}</p>
           </div>
         </div>
         <div className={s.row}>
           <p className={s.rowLabel}>Validity period</p>
           <div className={s.rowValue}>
-            <p>some date</p>
+            {!dateRangePicked && !showDatePicker && (
+              <Button
+                buttonText="Select date"
+                handleClick={() => setShowDatePicker(true)}
+              />
+            )}
+            {showDatePicker && (
+              <DayPicker
+                mode="range"
+                selected={range}
+                footer={footer}
+                onSelect={setRange}
+              />
+            )}
+            {range && range.from && range.to && !showDatePicker && (
+              <p>
+                {format(range.from, "PPP")}–{format(range.to, "PPP")}
+              </p>
+            )}
           </div>
         </div>
         <div className={s.poolSummary}>
