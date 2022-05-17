@@ -112,7 +112,7 @@ export const WalletDashboard = () => {
         <div className={s.tableRow}>
           <p className={s.tableHead}>Assets</p>
           <p className={s.tableHead}>Balance</p>
-          <p className={s.tableHead}>Expiry Period</p>
+          <p className={s.tableHead}>Fee Amount</p>
         </div>
         {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
@@ -130,7 +130,7 @@ export const WalletDashboard = () => {
                 <p className={s.data}>
                   {item.insuranceLiquidityRequest / 10 ** 18}
                 </p>
-                <p className={s.data}>{"tbc"}</p>
+                <p className={s.data}>{item.feeAmount / 10 ** 18}</p>
                 <div className={s.data}>
                   <button
                     onClick={() => reimburse(item.poolId)}

@@ -61,8 +61,16 @@ export const DashboardDetailsModal = ({ show, onClose, item, token }) => {
     },
   });
 
-  //Step 2: Create a new variable to store the pool data
+  //Step 2: Create a new variable to store the pool data inclding time in UCT format
   const pool = poolData?.poolEntities[0];
+  const startDate = new Date(pool?.startDate * 1000).toLocaleDateString(
+    "en-GB"
+  );
+  const startTime = new Date(pool?.startDate * 1000).toLocaleTimeString(
+    "en-GB"
+  );
+  const endDate = new Date(pool?.endDate * 1000).toLocaleDateString("en-GB");
+  const endTime = new Date(pool?.endDate * 1000).toLocaleTimeString("en-GB");
 
   const calculateLossPercentage = (tresholdPrice, basePrice) => {
     const difference = basePrice - tresholdPrice;
@@ -99,11 +107,13 @@ export const DashboardDetailsModal = ({ show, onClose, item, token }) => {
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Fee %</p>
-            <p className={s.value}>{pool?.feePercentage}</p>
+            <p className={s.value}>{`${pool?.feePercentage} %`}</p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Validity Period</p>
-            <p className={s.value}>TBA</p>
+            <p className={s.value}>
+              {`${startDate} (${startTime}) - ${endDate} (${endTime})`}
+            </p>
           </div>
           <div className={s.modalRow}>
             <p className={s.label}>Total Amount Insured</p>
