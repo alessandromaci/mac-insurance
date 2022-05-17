@@ -60,7 +60,7 @@ contract Test_MacInsuranceMain {
     }
 
     function getUserFee(uint16 _id, uint256 _amount)
-        internal
+        public
         view
         returns (uint256)
     {
@@ -74,14 +74,13 @@ contract Test_MacInsuranceMain {
     }
 
     function getReimbursement(uint16 _id, uint256 _amount)
-        internal
+        public
         view
         returns (uint256)
     {
         uint256 priceLossCover = poolDataList[_id].priceLossCover;
-        int256 insuranceTreshold = (poolDataList[_id].insuranceTreshold);
-        uint256 reimbursementAmount = ((_amount / priceLossCover) /
-            uint256(insuranceTreshold)) * 10**10;
+        uint256 priceDiff = _amount - (_amount / 100 * priceLossCover);
+        uint256 reimbursementAmount = (_amount - priceDiff) * _amount / priceDiff;
         return reimbursementAmount;
     }
 
