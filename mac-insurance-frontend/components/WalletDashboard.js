@@ -1,7 +1,7 @@
 import s from "../styles/WalletDashboard.module.scss";
 import { useState } from "react";
 import ethLogo from "../public/ethLogo.png";
-import btcLogo from "../public/bitcoin.svg";
+import daiLogo from "../public/dai-logo.png";
 import Image from "next/image";
 import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";

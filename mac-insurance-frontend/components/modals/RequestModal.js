@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import ReactDOM from "react-dom";
 import s from "../../styles/MarketsModal.module.scss";
 import MacInsurance from "../../abis/MacInsuranceMain.json";
+import ERC20 from "../../abis/TokenMain.json";
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
@@ -17,11 +18,25 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
 
+  const tokenContractInstance = new web3.eth.Contract(
+    ERC20.abi,
+    pool?.tokenAddress
+  );
+
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
   };
 
   const requestInsurance = async () => {
+    // Step 1: Call the ERC20 contract to approve the transfer of tokens
+    const approveTokenTransactionParams = {
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      to: pool?.tokenAddress,
+      data: tokenContractInstance.methods
+        .approve(macContractAddress, ethers.utils.parseEther(amount))
+        .encodeABI(),
+    };
+
     const transactionParams = {
       // Hardcoded address for testing
       from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
@@ -32,6 +47,7 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
     };
 
     try {
+      await web3.eth.sendTransaction(approveTokenTransactionParams);
       await web3.eth.sendTransaction(transactionParams);
     } catch (err) {
       console.log("err: ", err);
