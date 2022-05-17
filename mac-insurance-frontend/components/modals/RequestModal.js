@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import ReactDOM from "react-dom";
 import s from "../../styles/MarketsModal.module.scss";
 import MacInsurance from "../../abis/MacInsuranceMain.json";
+import ERC20 from "../../abis/TokenMain.json";
 
-// to move this value in a env file
-const alchemyKey =
-  "https://eth-rinkeby.alchemyapi.io/v2/eHE1jX6Aksdxa1oTvMddTHeKQsIeRuHa";
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 const macContractAddress = MacInsurance.address;
@@ -18,21 +18,37 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
 
+  const tokenContractInstance = new web3.eth.Contract(
+    ERC20.abi,
+    pool?.tokenAddress
+  );
+
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
   };
 
   const requestInsurance = async () => {
+    // Step 1: Call the ERC20 contract to approve the transfer of tokens
+    const approveTokenTransactionParams = {
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      to: pool?.tokenAddress,
+      data: tokenContractInstance.methods
+        .approve(macContractAddress, ethers.utils.parseEther(amount))
+        .encodeABI(),
+    };
+
     const transactionParams = {
-      from: address,
+      // Hardcoded address for testing
+      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
       to: macContractAddress,
       data: macContractInstance.methods
-        .requestInsurance(pool.poolId, amount)
+        .requestInsurance(pool.poolId, ethers.utils.parseEther(amount))
         .encodeABI(),
     };
 
     try {
-      const tx = await web3.eth.sendTransaction(transactionParams);
+      await web3.eth.sendTransaction(approveTokenTransactionParams);
+      await web3.eth.sendTransaction(transactionParams);
     } catch (err) {
       console.log("err: ", err);
     }

@@ -1,16 +1,16 @@
 import s from "../styles/Markets.module.scss";
 import ethLogo from "../public/ethLogo.png";
 import daiLogo from "../public/dai-logo.png";
-import btcLogo from "../public/bitcoin.svg";
 import { useState } from "react";
 import Image from "next/image";
 import { SupplyModal } from "./modals/SupplyModal";
 import { RequestModal } from "./modals/RequestModal";
 import { gql, useQuery } from "@apollo/client";
+import { ethers } from "ethers";
 
 const GET_OPEN_POOLS = gql`
   query {
-    poolEntities(first: 5, where: { state: "created" }) {
+    poolEntities(where: { state: "created" }) {
       createdAtTimestamp
       poolId
       tokenAddress
@@ -37,7 +37,13 @@ export const Markets = () => {
   } = useQuery(GET_OPEN_POOLS);
 
   const pools = poolsData?.poolEntities;
-  console.log(pools);
+  const retrieveValidityPeriod = (start, end) => {
+    const startDate = new Date(start * 1000).toLocaleDateString("en-GB");
+    const startTime = new Date(start * 1000).toLocaleTimeString("en-GB");
+    const endDate = new Date(end * 1000).toLocaleDateString("en-GB");
+    const endTime = new Date(end * 1000).toLocaleTimeString("en-GB");
+    return `${startDate} (${startTime}) - ${endDate} (${endTime})`;
+  };
 
   // This is an helper function to get the cover loss percentage. Maybe we can move this operation to the query as well
   const calculateLossPercentage = (tresholdPrice, basePrice) => {
@@ -45,17 +51,14 @@ export const Markets = () => {
     return ((difference * 100) / basePrice).toFixed(2);
   };
 
-  // Other helper function to retrieve the right logo based on the address. Noticed a very weird behaviour where the token address letters gets changed between lower and capital. Super weird! Temporarily treating both difference like this.
+  // Other helper function to retrieve the right logo and name based on the address.
   const retrieveTokenData = (tokenAddress) => {
     const tokenData = {
       name: "",
       logo: "",
     };
-    switch (tokenAddress) {
-      case "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735":
-        tokenData.name = "DAI";
-        tokenData.logo = daiLogo;
-        break;
+    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
+    switch (checkSumAddress) {
       case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
         tokenData.name = "DAI";
         tokenData.logo = daiLogo;
@@ -70,9 +73,9 @@ export const Markets = () => {
     return tokenData;
   };
 
-  const handleSupplyModal = (data) => {
+  const handleSupplyModal = (data, pool) => {
     setModalData(data);
-
+    setModalPoolData(pool);
     setShowSupplyModal(true);
   };
 
@@ -89,7 +92,9 @@ export const Markets = () => {
           <p className={s.tableHead}>Assets</p>
           <p className={s.tableHead}>Price Loss %</p>
           <p className={s.tableHead}>Fee %</p>
+          <p className={s.tableHead}>Validity Period</p>
         </div>
+        {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
           {pools?.map((item, index) => (
             <div key={index}>
@@ -110,8 +115,16 @@ export const Markets = () => {
                 </p>
                 <p className={s.data}>{item.feePercentage} %</p>
                 <div className={s.data}>
+                  <p>{retrieveValidityPeriod(item.startDate, item.endDate)}</p>
+                </div>
+                <div className={s.data}>
                   <button
-                    onClick={() => handleSupplyModal(item)}
+                    onClick={() =>
+                      handleSupplyModal(
+                        retrieveTokenData(item.tokenAddress),
+                        item
+                      )
+                    }
                     className={s.dataButton}
                   >
                     Supply
@@ -139,6 +152,7 @@ export const Markets = () => {
         onClose={() => setShowSupplyModal(false)}
         show={showSupplyModal}
         item={modalData}
+        pool={modalPoolData}
       />
       <RequestModal
         onClose={() => setShowRequestModal(false)}
