@@ -33,9 +33,11 @@ const macContractInstance = new web3.eth.Contract(
 export const WalletDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState();
+  const [tokenData, setTokenData] = useState();
 
-  const handleModalOpening = (data) => {
+  const handleModalOpening = (data, token) => {
     setModalData(data);
+    setTokenData(token);
     setShowModal(true);
   };
 
@@ -46,7 +48,6 @@ export const WalletDashboard = () => {
     data: poolsData,
   } = useQuery(GET_PROFILE_POOLS, {
     variables: {
-      first: 5,
       where: {
         insuranceRequester: "0xfb0ac8078982c876e894e35f5890652886b8c88b", // to be changed once we fethc the user address
       },
@@ -140,7 +141,12 @@ export const WalletDashboard = () => {
                 </div>
                 <div className={s.data}>
                   <button
-                    onClick={() => handleModalOpening(item)}
+                    onClick={() =>
+                      handleModalOpening(
+                        item,
+                        retrieveTokenData(item.tokenAddress)
+                      )
+                    }
                     className={s.dataButton}
                   >
                     Details
@@ -156,6 +162,7 @@ export const WalletDashboard = () => {
         onClose={() => setShowModal(false)}
         show={showModal}
         item={modalData}
+        token={tokenData}
       />
     </div>
   );

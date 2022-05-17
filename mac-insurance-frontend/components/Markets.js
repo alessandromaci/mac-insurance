@@ -10,7 +10,7 @@ import { ethers } from "ethers";
 
 const GET_OPEN_POOLS = gql`
   query {
-    poolEntities(first: 5, where: { state: "created" }) {
+    poolEntities(where: { state: "created" }) {
       createdAtTimestamp
       poolId
       tokenAddress
