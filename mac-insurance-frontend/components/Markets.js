@@ -37,6 +37,13 @@ export const Markets = () => {
   } = useQuery(GET_OPEN_POOLS);
 
   const pools = poolsData?.poolEntities;
+  const retrieveValidityPeriod = (start, end) => {
+    const startDate = new Date(start * 1000).toLocaleDateString("en-GB");
+    const startTime = new Date(start * 1000).toLocaleTimeString("en-GB");
+    const endDate = new Date(end * 1000).toLocaleDateString("en-GB");
+    const endTime = new Date(end * 1000).toLocaleTimeString("en-GB");
+    return `${startDate} (${startTime}) - ${endDate} (${endTime})`;
+  };
 
   // This is an helper function to get the cover loss percentage. Maybe we can move this operation to the query as well
   const calculateLossPercentage = (tresholdPrice, basePrice) => {
@@ -85,6 +92,7 @@ export const Markets = () => {
           <p className={s.tableHead}>Assets</p>
           <p className={s.tableHead}>Price Loss %</p>
           <p className={s.tableHead}>Fee %</p>
+          <p className={s.tableHead}>Validity Period</p>
         </div>
         {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
@@ -106,6 +114,9 @@ export const Markets = () => {
                   )} % (< $${item.tresholdPrice / 10 ** 8})`}
                 </p>
                 <p className={s.data}>{item.feePercentage} %</p>
+                <div className={s.data}>
+                  <p>{retrieveValidityPeriod(item.startDate, item.endDate)}</p>
+                </div>
                 <div className={s.data}>
                   <button
                     onClick={() =>
