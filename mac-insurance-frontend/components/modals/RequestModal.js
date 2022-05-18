@@ -1,41 +1,42 @@
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import ReactDOM from "react-dom";
-import s from "../../styles/MarketsModal.module.scss";
-import MacInsurance from "../../abis/MacInsuranceMain.json";
-import ERC20 from "../../abis/TokenMain.json";
+import { useEffect, useState } from "react"
+import { ethers } from "ethers"
+import ReactDOM from "react-dom"
+import s from "../../styles/MarketsModal.module.scss"
+import MacInsurance from "../../abis/MacInsuranceMain.json"
+import ERC20 from "../../abis/TokenMain.json"
 
-const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-const web3 = createAlchemyWeb3(alchemyKey);
-const macContractAddress = MacInsurance.address;
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
+const web3 = createAlchemyWeb3(alchemyKey)
+const macContractAddress = MacInsurance.address
 const macContractInstance = new web3.eth.Contract(
   MacInsurance.abi,
   macContractAddress
-);
+)
 
-export const RequestModal = ({ item, pool, show, onClose }) => {
-  const [isBrowser, setIsBrowser] = useState(false);
-  const [amount, setAmount] = useState(0);
+export const RequestModal = ({ item, pool, show, onClose, account }) => {
+  const [isBrowser, setIsBrowser] = useState(false)
+  const [amount, setAmount] = useState(0)
 
   const tokenContractInstance = new web3.eth.Contract(
     ERC20.abi,
     pool?.tokenAddress
-  );
+  )
 
   const handleAmountChange = (e) => {
-    setAmount(e.target.value);
-  };
+    setAmount(e.target.value)
+  }
 
   const requestInsurance = async () => {
     // Step 1: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
+      // now have access to account variable
       from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
       to: pool?.tokenAddress,
       data: tokenContractInstance.methods
         .approve(macContractAddress, ethers.utils.parseEther(amount))
         .encodeABI(),
-    };
+    }
 
     const transactionParams = {
       // Hardcoded address for testing
@@ -44,19 +45,19 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
       data: macContractInstance.methods
         .requestInsurance(pool.poolId, ethers.utils.parseEther(amount))
         .encodeABI(),
-    };
+    }
 
     try {
-      await web3.eth.sendTransaction(approveTokenTransactionParams);
-      await web3.eth.sendTransaction(transactionParams);
+      await web3.eth.sendTransaction(approveTokenTransactionParams)
+      await web3.eth.sendTransaction(transactionParams)
     } catch (err) {
-      console.log("err: ", err);
+      console.log("err: ", err)
     }
-  };
+  }
 
   useEffect(() => {
-    setIsBrowser(true);
-  }, []);
+    setIsBrowser(true)
+  }, [])
 
   const modalContent = show ? (
     <div className={s.modalOverlay}>
@@ -83,14 +84,14 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
         </div>
       </div>
     </div>
-  ) : null;
+  ) : null
 
   if (isBrowser) {
     return ReactDOM.createPortal(
       modalContent,
       document.getElementById("supply-modal")
-    );
+    )
   } else {
-    return null;
+    return null
   }
-};
+}
