@@ -8,8 +8,16 @@ import Image from "next/image";
 import { addDays, format } from "date-fns";
 import { DateRange, DayPicker, useDayRender } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { ethers } from "ethers";
+import MacInsurance from "../abis/MacInsuranceMain.json";
+import ERC20 from "../abis/TokenMain.json";
 
-export const Pool = () => {
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const web3 = createAlchemyWeb3(alchemyKey);
+const macContractAddress = MacInsurance.address;
+
+export const Pool = ({ account }) => {
   const [selectedToken, setSelectedToken] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [range, setRange] = useState();
@@ -18,12 +26,69 @@ export const Pool = () => {
   const [lossCover, setLossCover] = useState(null);
   const [amount, setAmount] = useState(null);
 
+  // Step 0: Creating contract instance for mac and ERC20
+  const macContractInstance = new web3.eth.Contract(
+    MacInsurance.abi,
+    macContractAddress
+  );
+
+  const tokenContractInstance = new web3.eth.Contract(
+    ERC20.abi,
+    selectedToken?.contractAddress
+  );
+
+  const initAndSupplyInsurance = async () => {
+    // Step 0: Find contract id
+    const id = await macContractInstance.methods.id().call();
+
+    //Step 1: Call function to init pool
+    const initInsuranceTransactionParams = {
+      from: account, // Hardcoded address for testing
+      to: macContractAddress,
+      data: macContractInstance.methods
+        .initPool(
+          selectedToken.contractAddress,
+          selectedToken.priceFeed,
+          lossCover,
+          fee,
+          startDate,
+          endDate
+        )
+        .encodeABI(),
+    };
+    // Step 2: Call the ERC20 contract to approve the transfer of tokens
+    const approveTokenTransactionParams = {
+      from: account, // Hardcoded address for testing
+      to: selectedToken.contractAddress,
+      data: tokenContractInstance.methods
+        .approve(macContractAddress, ethers.utils.parseEther(amount))
+        .encodeABI(),
+    };
+
+    // Step 3: Call the main contract to supply insurance.
+    const supplyInsuranceTransactionParams = {
+      from: account, // Hardcoded address for testing
+      to: macContractAddress,
+      data: macContractInstance.methods
+        .supplyPool(id, ethers.utils.parseEther(amount))
+        .encodeABI(),
+    };
+
+    try {
+      await web3.eth.sendTransaction(initInsuranceTransactionParams);
+      await web3.eth.sendTransaction(approveTokenTransactionParams);
+      await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
+    } catch (err) {
+      console.log("err: ", err);
+    }
+  };
+
   const tokens = [
     {
       value: "eth",
       label: "WETH",
       img: ethLogo,
-      tokenAddress: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+      contractAddress: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
       priceFeed: "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e",
     },
     {
@@ -179,7 +244,7 @@ export const Pool = () => {
           </div>
 
           <Button
-            handleClick={() => console.log("Approve")}
+            handleClick={() => initAndSupplyInsurance()}
             className={s.button}
             buttonText="Approve"
           />
