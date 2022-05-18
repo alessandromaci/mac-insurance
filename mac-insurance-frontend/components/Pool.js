@@ -127,7 +127,17 @@ export const Pool = () => {
         </div>
         <div className={s.poolSummary}>
           <h3 className={s.summaryHeading}>Supply Liquidity</h3>
-          <p className={s.summaryLiquidity}>ETH: 0.0</p>
+          <div className={s.supplyContainer}>
+            <p className={s.summaryLiquidity}>ETH:</p>
+            <input
+              className={s.supplyInput}
+              type="number"
+              min={0}
+              defaultValue={0.0}
+              step={0.1}
+            />
+          </div>
+
           <Button
             handleClick={() => console.log("Approve")}
             className={s.button}
