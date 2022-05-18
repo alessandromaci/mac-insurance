@@ -14,7 +14,7 @@ const macContractInstance = new web3.eth.Contract(
   macContractAddress
 );
 
-export const RequestModal = ({ item, pool, show, onClose }) => {
+export const RequestModal = ({ item, pool, show, onClose, account }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
 
@@ -23,6 +23,8 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
     pool?.tokenAddress
   );
 
+  console.log(account);
+
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
   };
@@ -30,7 +32,8 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
   const requestInsurance = async () => {
     // Step 1: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      // now have access to account variable
+      from: account,
       to: pool?.tokenAddress,
       data: tokenContractInstance.methods
         .approve(macContractAddress, ethers.utils.parseEther(amount))
@@ -38,8 +41,7 @@ export const RequestModal = ({ item, pool, show, onClose }) => {
     };
 
     const transactionParams = {
-      // Hardcoded address for testing
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
+      from: account,
       to: macContractAddress,
       data: macContractInstance.methods
         .requestInsurance(pool.poolId, ethers.utils.parseEther(amount))

@@ -10,7 +10,7 @@ const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 const macContractAddress = MacInsurance.address;
 
-export const SupplyModal = ({ item, pool, show, onClose }) => {
+export const SupplyModal = ({ item, pool, show, onClose, account }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
 
@@ -32,7 +32,7 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
   const supplyInsurance = async () => {
     // Step 1: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      from: account, // Hardcoded address for testing
       to: pool?.tokenAddress,
       data: tokenContractInstance.methods
         .approve(macContractAddress, ethers.utils.parseEther(amount))
@@ -41,7 +41,7 @@ export const SupplyModal = ({ item, pool, show, onClose }) => {
 
     // Step 2: Call the main contract to supply insurance.
     const supplyInsuranceTransactionParams = {
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B", // Hardcoded address for testing
+      from: account, // Hardcoded address for testing
       to: macContractAddress,
       data: macContractInstance.methods
         .supplyPool(pool.poolId, ethers.utils.parseEther(amount))

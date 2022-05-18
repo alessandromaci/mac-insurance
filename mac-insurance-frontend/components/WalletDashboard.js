@@ -10,8 +10,10 @@ import { ethers } from "ethers";
 import MacInsurance from "../abis/MacInsuranceMain.json";
 
 const GET_PROFILE_POOLS = gql`
-  query {
-    insuranceRequestEntities {
+  query ($insuranceRequester: Bytes!) {
+    insuranceRequestEntities(
+      where: { insuranceRequester: $insuranceRequester }
+    ) {
       createdAtTimestamp
       poolId
       tokenAddress
@@ -30,7 +32,7 @@ const macContractInstance = new web3.eth.Contract(
   macContractAddress
 );
 
-export const WalletDashboard = () => {
+export const WalletDashboard = ({ account }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState();
   const [tokenData, setTokenData] = useState();
@@ -48,9 +50,7 @@ export const WalletDashboard = () => {
     data: poolsData,
   } = useQuery(GET_PROFILE_POOLS, {
     variables: {
-      where: {
-        insuranceRequester: "0xfb0ac8078982c876e894e35f5890652886b8c88b", // to be changed once we fethc the user address
-      },
+      insuranceRequester: account,
     },
   });
 
@@ -80,7 +80,7 @@ export const WalletDashboard = () => {
   const reimburse = async (poolId) => {
     const transactionParams = {
       // Hardcoded address for testing
-      from: "0xFB0aC8078982C876E894E35F5890652886b8c88B",
+      from: account,
       to: macContractAddress,
       data: macContractInstance.methods
         .requestReimbursement(poolId)

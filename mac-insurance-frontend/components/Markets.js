@@ -23,7 +23,7 @@ const GET_OPEN_POOLS = gql`
   }
 `;
 
-export const Markets = () => {
+export const Markets = ({ account }) => {
   const [showSupplyModal, setShowSupplyModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [modalData, setModalData] = useState();
@@ -153,12 +153,14 @@ export const Markets = () => {
         show={showSupplyModal}
         item={modalData}
         pool={modalPoolData}
+        account={account}
       />
       <RequestModal
         onClose={() => setShowRequestModal(false)}
         show={showRequestModal}
         item={modalData}
         pool={modalPoolData}
+        account={account}
       />
     </div>
   );
