@@ -6,7 +6,7 @@ import ethLogo from "../public/ethLogo.png"
 import daiLogo from "../public/dai-logo.png"
 import Image from "next/image"
 import { addDays, format } from "date-fns"
-import { DateRange, DayPicker } from "react-day-picker"
+import { DateRange, DayPicker, useDayRender } from "react-day-picker"
 import "react-day-picker/dist/style.css"
 
 export const Pool = () => {
@@ -116,12 +116,26 @@ export const Pool = () => {
                 selected={range}
                 footer={footer}
                 onSelect={setRange}
+                styles={{ day: { color: "#03cea4" } }}
+                modifiersClassNames={{
+                  selected: s.selected,
+                  day: s.cell,
+                }}
               />
             )}
             {range && range.from && range.to && !showDatePicker && (
-              <p>
-                {format(range.from, "PPP")}–{format(range.to, "PPP")}
-              </p>
+              <div className={s.dateSelectedContainer}>
+                {" "}
+                <p className={s.dateRange}>
+                  {format(range.from, "PPP")}–{format(range.to, "PPP")}
+                </p>
+                <button
+                  onClick={() => setShowDatePicker(true)}
+                  className={s.openDateButton}
+                >
+                  edit
+                </button>
+              </div>
             )}
           </div>
         </div>
