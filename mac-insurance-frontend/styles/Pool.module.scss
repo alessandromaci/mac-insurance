@@ -2,7 +2,7 @@
 @import "./variables";
 
 .container {
-  min-width: $small;
+  min-width: $tablet;
   margin: $space-large auto;
   display: flex;
   padding: $space-normal;
@@ -22,7 +22,7 @@
   align-items: center;
   flex-direction: column;
   margin: auto;
-  min-width: $small;
+  min-width: $tablet;
 }
 
 .selectOption {
@@ -71,6 +71,21 @@
 .summaryHeading {
   font-size: 18px;
   margin: 0;
+}
+
+.supplyContainer {
+  display: flex;
+  width: 150px;
+  justify-content: center;
+}
+
+.supplyInput {
+  font-size: 32px;
+  background: transparent;
+  border: none;
+  width: 100px;
+  color: $text;
+  text-align: center;
 }
 
 .summaryLiquidity {
