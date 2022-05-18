@@ -2,11 +2,134 @@
 @import "./variables";
 
 .container {
-  min-width: $small;
+  min-width: $tablet;
   margin: $space-large auto;
   display: flex;
   padding: $space-normal;
   background-color: $dark;
   border-radius: $x4;
   flex: 1;
+}
+
+.tabHeader {
+  font-size: 28px;
+  margin: 0 0 $x2 0;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: auto;
+  max-width: 500px;
+}
+
+.selectOption {
+  display: flex;
+  align-items: center;
+}
+
+.selectLabel {
+  margin-left: $x2;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 500px;
+  margin-bottom: $x2;
+}
+
+.rowLabel {
+  width: 45%;
+}
+
+.rowValue {
+  width: 45%;
+}
+
+.inputWithPreview {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 45%;
+}
+
+.lossPreviewText {
+  margin-left: $x2;
+}
+
+.poolSummary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.summaryHeading {
+  font-size: 18px;
+  margin: 0;
+}
+
+.supplyContainer {
+  display: flex;
+  width: 150px;
+  justify-content: center;
+}
+
+.supplyInput {
+  font-size: 32px;
+  background: transparent;
+  border: none;
+  width: 100px;
+  color: $text;
+  text-align: center;
+}
+
+.summaryLiquidity {
+  font-size: 32px;
+  margin: $x2 0;
+}
+
+.numInput {
+  padding: $x1;
+  width: 100%;
+  background-color: transparent;
+  color: $text;
+  border: 1px solid $gray;
+  border-radius: $x1;
+}
+
+.dateSelectedContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dateRange {
+  margin-bottom: $x1;
+}
+
+.openDateButton {
+  background: none;
+  border: none;
+  color: $green;
+  font-size: 12px;
+  align-self: center;
+  cursor: pointer;
+}
+// Day picker styles
+
+.selected:not([disabled]) {
+  font-weight: bold;
+  border: 2px solid $green;
+}
+
+.selected:hover:not([disabled]) {
+  border-color: $green;
+  color: $green;
+  background-color: $extraDark;
 }
