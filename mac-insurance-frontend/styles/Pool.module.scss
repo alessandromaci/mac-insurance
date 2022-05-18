@@ -22,7 +22,7 @@
   align-items: center;
   flex-direction: column;
   margin: auto;
-  min-width: $tablet;
+  max-width: 500px;
 }
 
 .selectOption {
@@ -38,7 +38,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-width: $phone;
+  width: 500px;
   margin-bottom: $x2;
 }
 
@@ -100,4 +100,36 @@
   color: $text;
   border: 1px solid $gray;
   border-radius: $x1;
+}
+
+.dateSelectedContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dateRange {
+  margin-bottom: $x1;
+}
+
+.openDateButton {
+  background: none;
+  border: none;
+  color: $green;
+  font-size: 12px;
+  align-self: center;
+  cursor: pointer;
+}
+// Day picker styles
+
+.selected:not([disabled]) {
+  font-weight: bold;
+  border: 2px solid $green;
+}
+
+.selected:hover:not([disabled]) {
+  border-color: $green;
+  color: $green;
+  background-color: $extraDark;
 }
