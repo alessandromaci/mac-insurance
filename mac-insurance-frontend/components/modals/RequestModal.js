@@ -75,6 +75,10 @@ export const RequestModal = ({ item, pool, show, onClose, account }) => {
     }
   }, [amount]);
 
+  useEffect(() => {
+    setFee(0);
+  }, [pool]);
+
   const modalContent = show ? (
     <div className={s.modalOverlay}>
       <div className={s.modal}>
