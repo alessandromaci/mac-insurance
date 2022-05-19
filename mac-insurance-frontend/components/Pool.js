@@ -188,7 +188,6 @@ export const Pool = ({ account }) => {
               placeholder="0%-100%..."
               onChange={(e) => setLossCover(e.target.value)}
             />
-            <p className={s.lossPreviewText}>{`[<$2357.10]`}</p>
           </div>
         </div>
         <div className={s.row}>

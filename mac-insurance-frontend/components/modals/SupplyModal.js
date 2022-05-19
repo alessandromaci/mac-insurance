@@ -25,10 +25,6 @@ export const SupplyModal = ({ item, pool, show, onClose, account }) => {
     pool?.tokenAddress
   );
 
-  const handleAmountChange = (e) => {
-    setAmount(e.target.value);
-  };
-
   const supplyInsurance = async () => {
     // Step 1: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
@@ -73,7 +69,7 @@ export const SupplyModal = ({ item, pool, show, onClose, account }) => {
             className={s.priceValue}
             type="number"
             placeholder="0"
-            onChange={handleAmountChange}
+            onChange={(e) => setAmount(e.target.value)}
           />
         </div>
         <div className={s.buttonContainer}>
