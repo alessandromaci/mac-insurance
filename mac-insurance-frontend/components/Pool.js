@@ -5,6 +5,7 @@ import { Button } from "./Button";
 import ethLogo from "../public/ethLogo.png";
 import daiLogo from "../public/dai-logo.png";
 import Image from "next/image";
+import { ToastContainer, toast } from "react-toastify";
 import { addDays, format } from "date-fns";
 import { DateRange, DayPicker, useDayRender } from "react-day-picker";
 import "react-day-picker/dist/style.css";
@@ -78,6 +79,16 @@ export const Pool = ({ account }) => {
       await web3.eth.sendTransaction(initInsuranceTransactionParams);
       await web3.eth.sendTransaction(approveTokenTransactionParams);
       await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
+      toast.success("You created a new insurance pool!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } catch (err) {
       console.log("err: ", err);
     }
@@ -249,6 +260,7 @@ export const Pool = ({ account }) => {
           />
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

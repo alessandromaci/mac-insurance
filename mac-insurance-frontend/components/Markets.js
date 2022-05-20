@@ -1,12 +1,12 @@
-import s from "../styles/Markets.module.scss"
-import ethLogo from "../public/ethLogo.png"
-import daiLogo from "../public/dai-logo.png"
-import { useState } from "react"
-import Image from "next/image"
-import { SupplyModal } from "./modals/SupplyModal"
-import { RequestModal } from "./modals/RequestModal"
-import { gql, useQuery } from "@apollo/client"
-import { ethers } from "ethers"
+import s from "../styles/Markets.module.scss";
+import ethLogo from "../public/ethLogo.png";
+import daiLogo from "../public/dai-logo.png";
+import { useState } from "react";
+import Image from "next/image";
+import { SupplyModal } from "./modals/SupplyModal";
+import { RequestModal } from "./modals/RequestModal";
+import { gql, useQuery } from "@apollo/client";
+import { ethers } from "ethers";
 
 const GET_OPEN_POOLS = gql`
   query {
@@ -21,20 +21,20 @@ const GET_OPEN_POOLS = gql`
       endDate
     }
   }
-`
+`;
 
 export const Markets = ({ account }) => {
-  const [showSupplyModal, setShowSupplyModal] = useState(false)
-  const [showRequestModal, setShowRequestModal] = useState(false)
-  const [modalData, setModalData] = useState()
-  const [modalPoolData, setModalPoolData] = useState()
+  const [showSupplyModal, setShowSupplyModal] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [modalData, setModalData] = useState();
+  const [modalPoolData, setModalPoolData] = useState();
 
   // Query the list of created pools from the subgraph
   const {
     loading: poolsLoading,
     error: poolsError,
     data: poolsData,
-  } = useQuery(GET_OPEN_POOLS)
+  } = useQuery(GET_OPEN_POOLS);
 
   const pools = poolsData?.poolEntities;
   const validPools = pools?.filter((pool, index) => {
@@ -50,60 +50,60 @@ export const Markets = ({ account }) => {
   });
 
   const retrieveValidityPeriod = (start, end) => {
-    const startDate = new Date(start * 1000).toLocaleDateString("en-GB")
-    const startTime = new Date(start * 1000).toLocaleTimeString("en-GB")
-    const endDate = new Date(end * 1000).toLocaleDateString("en-GB")
-    const endTime = new Date(end * 1000).toLocaleTimeString("en-GB")
-    return `${startDate} (${startTime}) - ${endDate} (${endTime})`
-  }
+    const startDate = new Date(start * 1000).toLocaleDateString("en-GB");
+    const startTime = new Date(start * 1000).toLocaleTimeString("en-GB");
+    const endDate = new Date(end * 1000).toLocaleDateString("en-GB");
+    const endTime = new Date(end * 1000).toLocaleTimeString("en-GB");
+    return `${startDate} (${startTime}) - ${endDate} (${endTime})`;
+  };
 
   // This is an helper function to get the cover loss percentage. Maybe we can move this operation to the query as well
   const calculateLossPercentage = (tresholdPrice, basePrice) => {
-    const difference = basePrice - tresholdPrice
-    return ((difference * 100) / basePrice).toFixed(2)
-  }
+    const difference = basePrice - tresholdPrice;
+    return ((difference * 100) / basePrice).toFixed(2);
+  };
 
   // Other helper function to retrieve the right logo and name based on the address.
   const retrieveTokenData = (tokenAddress) => {
     const tokenData = {
       name: "",
       logo: "",
-    }
-    const checkSumAddress = ethers.utils.getAddress(tokenAddress)
+    };
+    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
     switch (checkSumAddress) {
       case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
-        tokenData.name = "DAI"
-        tokenData.logo = daiLogo
-        break
+        tokenData.name = "DAI";
+        tokenData.logo = daiLogo;
+        break;
       case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
-        tokenData.name = "WETH"
-        tokenData.logo = ethLogo
-        break
+        tokenData.name = "WETH";
+        tokenData.logo = ethLogo;
+        break;
       default:
-        break
+        break;
     }
-    return tokenData
-  }
+    return tokenData;
+  };
 
   const handleSupplyModal = (data, pool) => {
-    setModalData(data)
-    setModalPoolData(pool)
-    setShowSupplyModal(true)
-  }
+    setModalData(data);
+    setModalPoolData(pool);
+    setShowSupplyModal(true);
+  };
 
   const handleRequestModal = (data, pool) => {
-    setModalData(data)
-    setModalPoolData(pool)
-    setShowRequestModal(true)
-  }
+    setModalData(data);
+    setModalPoolData(pool);
+    setShowRequestModal(true);
+  };
   return (
     <div className={s.container}>
       <h3 className={s.tabHeader}>Open Insurance Pools</h3>
       <div>
         <div className={s.tableRow}>
           <p className={s.assetHead}>Assets</p>
-          <p className={s.priceLossHead}>Price Loss %</p>
-          <p className={s.feeHead}>Fee %</p>
+          <p className={s.priceLossHead}>Price Loss</p>
+          <p className={s.feeHead}>Fee</p>
           <p className={s.validityDataHead}>Validity Period</p>
         </div>
         {poolsLoading && <div>...loading</div>}
@@ -116,7 +116,7 @@ export const Markets = ({ account }) => {
                   width={30}
                   height={30}
                 />
-                <p>{retrieveTokenData(item.tokenAddress).name}</p>
+                {/* <p>{retrieveTokenData(item.tokenAddress).name}</p> */}
               </div>
               <p className={s.priceLossData}>
                 {`${calculateLossPercentage(
@@ -172,5 +172,5 @@ export const Markets = ({ account }) => {
         account={account}
       />
     </div>
-  )
-}
+  );
+};
