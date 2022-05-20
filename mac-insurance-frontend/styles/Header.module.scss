@@ -5,6 +5,7 @@
   padding: $space-large;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   @media (max-width: $phone) {
     flex-direction: column;
@@ -12,6 +13,10 @@
     padding: $space-normal;
   }
 }
+
+// .logo {
+//   border-radius: 50%;
+// }
 
 .headingItem {
   background-color: $dark;
@@ -22,6 +27,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 50px;
 
   @media (max-width: $phone) {
     margin-bottom: $x2;

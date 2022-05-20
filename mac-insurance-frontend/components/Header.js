@@ -1,13 +1,13 @@
 import s from "../styles/Header.module.scss"
 import { Button } from "./Button"
 import Image from "next/image"
-import RectangleLogo from "../public/rectangle-logo.png"
+import Logo from "../public/maclogo.png"
 
 export const Header = ({ walletConnected, account, connectWallet }) => {
   if (!walletConnected)
     return (
       <div className={s.container}>
-        <Image src={RectangleLogo} height={50} width={350} />
+        <Image className={s.logo} src={Logo} height={90} width={81} />
 
         <Button
           handleClick={connectWallet}
@@ -18,7 +18,7 @@ export const Header = ({ walletConnected, account, connectWallet }) => {
     )
   return (
     <div className={s.container}>
-      <Image src={RectangleLogo} height={50} width={350} />
+      <Image className={s.logo} src={Logo} height={90} width={81} />
 
       <div className={s.headingItem}>
         <p className={s.text}>
