@@ -4,6 +4,8 @@ import Select from "react-select";
 import { Button } from "./Button";
 import ethLogo from "../public/ethLogo.png";
 import daiLogo from "../public/dai-logo.png";
+import uscLogo from "../public/usdc-logo.png";
+import snxLogo from "../public/snx-logo.png";
 import Image from "next/image";
 import { ToastContainer, toast } from "react-toastify";
 import { addDays, format } from "date-fns";
@@ -108,6 +110,20 @@ export const Pool = ({ account }) => {
       img: daiLogo,
       contractAddress: "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
       priceFeed: "0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF",
+    },
+    {
+      value: "usdc",
+      label: "USDC",
+      img: uscLogo,
+      contractAddress: "0xeb8f08a975Ab53E34D8a0330E0D34de942C95926",
+      priceFeed: "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB",
+    },
+    {
+      value: "snx",
+      label: "SNX",
+      img: snxLogo,
+      contractAddress: "0x322A3346bf24363f451164d96A5b5cd5A7F4c337",
+      priceFeed: "0xE96C4407597CD507002dF88ff6E0008AB41266Ee",
     },
   ];
 

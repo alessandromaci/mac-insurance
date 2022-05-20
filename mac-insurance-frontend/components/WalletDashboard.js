@@ -7,6 +7,7 @@ import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";
 import { gql, useQuery } from "@apollo/client";
 import { ethers } from "ethers";
+import { useRetrieveTokenData } from "../hooks/useRetrieveTokenData";
 import MacInsurance from "../abis/MacInsuranceMain.json";
 
 const GET_PROFILE_POOLS = gql`
@@ -56,26 +57,8 @@ export const WalletDashboard = ({ account }) => {
 
   const pools = poolsData?.insuranceRequestEntities;
 
-  const retrieveTokenData = (tokenAddress) => {
-    const tokenData = {
-      name: "",
-      logo: "",
-    };
-    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
-    switch (checkSumAddress) {
-      case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
-        tokenData.name = "DAI";
-        tokenData.logo = daiLogo;
-        break;
-      case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
-        tokenData.name = "WETH";
-        tokenData.logo = ethLogo;
-        break;
-      default:
-        break;
-    }
-    return tokenData;
-  };
+  const retrieveTokenData = (tokenAddress) =>
+    useRetrieveTokenData(tokenAddress);
 
   const reimburse = async (poolId) => {
     const transactionParams = {

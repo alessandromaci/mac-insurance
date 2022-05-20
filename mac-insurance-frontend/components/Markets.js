@@ -1,12 +1,10 @@
 import s from "../styles/Markets.module.scss";
-import ethLogo from "../public/ethLogo.png";
-import daiLogo from "../public/dai-logo.png";
 import { useState } from "react";
 import Image from "next/image";
 import { SupplyModal } from "./modals/SupplyModal";
 import { RequestModal } from "./modals/RequestModal";
 import { gql, useQuery } from "@apollo/client";
-import { ethers } from "ethers";
+import { useRetrieveTokenData } from "../hooks/useRetrieveTokenData";
 
 const GET_OPEN_POOLS = gql`
   query {
@@ -64,26 +62,8 @@ export const Markets = ({ account }) => {
   };
 
   // Other helper function to retrieve the right logo and name based on the address.
-  const retrieveTokenData = (tokenAddress) => {
-    const tokenData = {
-      name: "",
-      logo: "",
-    };
-    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
-    switch (checkSumAddress) {
-      case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
-        tokenData.name = "DAI";
-        tokenData.logo = daiLogo;
-        break;
-      case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
-        tokenData.name = "WETH";
-        tokenData.logo = ethLogo;
-        break;
-      default:
-        break;
-    }
-    return tokenData;
-  };
+  const retrieveTokenData = (tokenAddress) =>
+    useRetrieveTokenData(tokenAddress);
 
   const handleSupplyModal = (data, pool) => {
     setModalData(data);
