@@ -23,6 +23,10 @@ export const useRetrieveTokenData = (tokenAddress) => {
       tokenData.name = "USDC";
       tokenData.logo = usdcLogo;
       break;
+    case "0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b":
+      tokenData.name = "USDC";
+      tokenData.logo = usdcLogo;
+      break;
     case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
       tokenData.name = "SNX";
       tokenData.logo = snxLogo;
