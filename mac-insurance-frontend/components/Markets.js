@@ -19,6 +19,7 @@ const GET_OPEN_POOLS = gql`
       basePrice
       tresholdPrice
       feePercentage
+      insuranceLiquidityAdded
       startDate
       endDate
     }
@@ -106,7 +107,6 @@ export const Markets = ({ account }) => {
                   width={30}
                   height={30}
                 />
-                {/* <p>{retrieveTokenData(item.tokenAddress).name}</p> */}
               </div>
               <p className={s.priceLossData}>
                 {`${calculateLossPercentage(

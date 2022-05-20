@@ -19,6 +19,7 @@ export const useRetrieveTokenData = (tokenAddress) => {
       tokenData.name = "WETH";
       tokenData.logo = ethLogo;
       break;
+    // hack because i created two usdc pools with two different tokens
     case "0xeb8f08a975Ab53E34D8a0330E0D34de942C95926":
       tokenData.name = "USDC";
       tokenData.logo = usdcLogo;

@@ -192,7 +192,7 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Insurance fee</p>
+          <p className={s.rowLabel}>Insurance fee %</p>
           <div className={s.rowValue}>
             <input
               className={s.numInput}
@@ -258,7 +258,7 @@ export const Pool = ({ account }) => {
         <div className={s.poolSummary}>
           <h3 className={s.summaryHeading}>Supply Liquidity</h3>
           <div className={s.supplyContainer}>
-            <p className={s.summaryLiquidity}>{selectedToken?.label ?? "NA"}</p>
+            <p className={s.summaryLiquidity}>{selectedToken?.label ?? ""}</p>
             <input
               className={s.supplyInput}
               type="number"
