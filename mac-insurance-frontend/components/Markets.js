@@ -7,8 +7,12 @@ import { gql, useQuery } from "@apollo/client";
 import { useRetrieveTokenData } from "../hooks/useRetrieveTokenData";
 
 const GET_OPEN_POOLS = gql`
-  query {
-    poolEntities(where: { state: "created" }) {
+  query ($state: String!, $orderBy: BigInt!, $orderDirection: String!) {
+    poolEntities(
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: { state: $state }
+    ) {
       createdAtTimestamp
       poolId
       tokenAddress
@@ -32,7 +36,13 @@ export const Markets = ({ account }) => {
     loading: poolsLoading,
     error: poolsError,
     data: poolsData,
-  } = useQuery(GET_OPEN_POOLS);
+  } = useQuery(GET_OPEN_POOLS, {
+    variables: {
+      state: "created",
+      orderBy: "startDate",
+      orderDirection: "asc",
+    },
+  });
 
   const pools = poolsData?.poolEntities;
   const validPools = pools?.filter((pool, index) => {
