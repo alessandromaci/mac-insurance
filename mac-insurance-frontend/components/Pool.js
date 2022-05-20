@@ -28,6 +28,7 @@ export const Pool = ({ account }) => {
   const [fee, setFee] = useState(null);
   const [lossCover, setLossCover] = useState(null);
   const [amount, setAmount] = useState(null);
+  const [buttonText, setButtonText] = useState(true);
 
   // Step 0: Creating contract instance for mac and ERC20
   const macContractInstance = new web3.eth.Contract(
@@ -78,9 +79,11 @@ export const Pool = ({ account }) => {
     };
 
     try {
+      setButtonText(false);
       await web3.eth.sendTransaction(initInsuranceTransactionParams);
       await web3.eth.sendTransaction(approveTokenTransactionParams);
       await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
+      setButtonText(true);
       toast.success("You created a new insurance pool!", {
         position: "top-right",
         autoClose: 5000,
@@ -272,7 +275,7 @@ export const Pool = ({ account }) => {
           <Button
             handleClick={() => initAndSupplyInsurance()}
             className={s.button}
-            buttonText="Approve"
+            buttonText={buttonText ? "Create" : "Loading..."}
           />
         </div>
       </div>
