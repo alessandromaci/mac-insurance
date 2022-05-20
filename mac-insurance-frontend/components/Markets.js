@@ -36,7 +36,19 @@ export const Markets = ({ account }) => {
     data: poolsData,
   } = useQuery(GET_OPEN_POOLS)
 
-  const pools = poolsData?.poolEntities
+  const pools = poolsData?.poolEntities;
+  const validPools = pools?.filter((pool, index) => {
+    const now = new Date();
+    const unixtime = (now.valueOf() / 1000).toFixed(2);
+    console.log(`unixtime: ${unixtime}`);
+    console.log(pool.startDate);
+    if (pool.startDate > unixtime) {
+      return pool;
+    } else {
+      return false;
+    }
+  });
+
   const retrieveValidityPeriod = (start, end) => {
     const startDate = new Date(start * 1000).toLocaleDateString("en-GB")
     const startTime = new Date(start * 1000).toLocaleTimeString("en-GB")
@@ -96,7 +108,7 @@ export const Markets = ({ account }) => {
         </div>
         {poolsLoading && <div>...loading</div>}
         <div className={s.dataContainer}>
-          {pools?.map((item, index) => (
+          {validPools?.map((item, index) => (
             <div key={index} className={s.tableRow}>
               <div className={s.assetData}>
                 <Image
