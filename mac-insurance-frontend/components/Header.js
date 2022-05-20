@@ -1,25 +1,25 @@
-import s from "../styles/Header.module.scss";
-import { Button } from "./Button";
+import s from "../styles/Header.module.scss"
+import { Button } from "./Button"
+import Image from "next/image"
+import Logo from "../public/maclogo.png"
 
 export const Header = ({ walletConnected, account, connectWallet }) => {
   if (!walletConnected)
     return (
       <div className={s.container}>
-        <div className={s.headingItem}>
-          <h1 className={s.text}>LOGO</h1>
-        </div>
+        <Image className={s.logo} src={Logo} height={90} width={81} />
+
         <Button
           handleClick={connectWallet}
           className={s.button}
           buttonText="Connect Wallet"
         />
       </div>
-    );
+    )
   return (
     <div className={s.container}>
-      <div className={s.headingItem}>
-        <h1 className={s.text}>LOGO</h1>
-      </div>
+      <Image className={s.logo} src={Logo} height={90} width={81} />
+
       <div className={s.headingItem}>
         <p className={s.text}>
           {account.length !== 42
@@ -28,5 +28,5 @@ export const Header = ({ walletConnected, account, connectWallet }) => {
         </p>
       </div>
     </div>
-  );
-};
+  )
+}
