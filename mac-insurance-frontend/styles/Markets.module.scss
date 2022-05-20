@@ -110,14 +110,17 @@
 
 .dataButton {
   background-color: transparent;
-  border: none;
+  border: 1px solid $green;
+  width: 80px;
   color: $green;
   font-size: 16px;
   font-weight: 300;
   cursor: pointer;
+  margin: 4px 0;
 
   &:hover {
-    text-decoration: underline;
-    opacity: 0.6;
+    opacity: 0.7;
+    background-color: $green;
+    color: $dark;
   }
 }
