@@ -93,8 +93,8 @@ export const WalletDashboard = ({ account }) => {
       <h3 className={s.tabHeader}>Your positions</h3>
       <div>
         <div className={s.tableRow}>
-          <p className={s.tableHead}>Assets</p>
-          <p className={s.tableHead}>Balance</p>
+          <p className={s.tableHeadAsset}>Assets</p>
+          <p className={s.tableHead}>Insurance Request</p>
           <p className={s.tableHead}>Fee Amount</p>
         </div>
         {poolsLoading && <div>...loading</div>}
@@ -108,12 +108,15 @@ export const WalletDashboard = ({ account }) => {
                     width={30}
                     height={30}
                   />
-                  <p>{retrieveTokenData(item.tokenAddress).name}</p>
                 </div>
                 <p className={s.data}>
-                  {item.insuranceLiquidityRequest / 10 ** 18}
+                  {item.insuranceLiquidityRequest / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
                 </p>
-                <p className={s.data}>{item.feeAmount / 10 ** 18}</p>
+                <p className={s.data}>
+                  {item.feeAmount / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
+                </p>
                 <div className={s.data}>
                   <button
                     onClick={() => reimburse(item.poolId)}
