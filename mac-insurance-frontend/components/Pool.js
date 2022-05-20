@@ -1,45 +1,46 @@
-import s from "../styles/Pool.module.scss";
-import { useEffect, useState } from "react";
-import Select from "react-select";
-import { Button } from "./Button";
-import ethLogo from "../public/ethLogo.png";
-import daiLogo from "../public/dai-logo.png";
-import Image from "next/image";
-import { addDays, format } from "date-fns";
-import { DateRange, DayPicker, useDayRender } from "react-day-picker";
-import "react-day-picker/dist/style.css";
-import { ethers } from "ethers";
-import MacInsurance from "../abis/MacInsuranceMain.json";
-import ERC20 from "../abis/TokenMain.json";
+import s from "../styles/Pool.module.scss"
+import { useEffect, useState } from "react"
+import Select from "react-select"
+import { Button } from "./Button"
+import ethLogo from "../public/ethLogo.png"
+import daiLogo from "../public/dai-logo.png"
+import Image from "next/image"
+import { addDays, format } from "date-fns"
+import { DateRange, DayPicker, useDayRender } from "react-day-picker"
+import "react-day-picker/dist/style.css"
+import { ethers } from "ethers"
+import MacInsurance from "../abis/MacInsuranceMain.json"
+import ERC20 from "../abis/TokenMain.json"
+import Tooltip from "@mui/material/Tooltip"
 
-const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-const web3 = createAlchemyWeb3(alchemyKey);
-const macContractAddress = MacInsurance.address;
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
+const web3 = createAlchemyWeb3(alchemyKey)
+const macContractAddress = MacInsurance.address
 
 export const Pool = ({ account }) => {
-  const [selectedToken, setSelectedToken] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [range, setRange] = useState();
-  const [dateRangePicked, setDateRangePicked] = useState(false);
-  const [fee, setFee] = useState(null);
-  const [lossCover, setLossCover] = useState(null);
-  const [amount, setAmount] = useState(null);
+  const [selectedToken, setSelectedToken] = useState(null)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [range, setRange] = useState()
+  const [dateRangePicked, setDateRangePicked] = useState(false)
+  const [fee, setFee] = useState(null)
+  const [lossCover, setLossCover] = useState(null)
+  const [amount, setAmount] = useState(null)
 
   // Step 0: Creating contract instance for mac and ERC20
   const macContractInstance = new web3.eth.Contract(
     MacInsurance.abi,
     macContractAddress
-  );
+  )
 
   const tokenContractInstance = new web3.eth.Contract(
     ERC20.abi,
     selectedToken?.contractAddress
-  );
+  )
 
   const initAndSupplyInsurance = async () => {
     // Step 0: Find contract id
-    const id = await macContractInstance.methods.id().call();
+    const id = await macContractInstance.methods.id().call()
 
     //Step 1: Call function to init pool
     const initInsuranceTransactionParams = {
@@ -55,7 +56,7 @@ export const Pool = ({ account }) => {
           endDate
         )
         .encodeABI(),
-    };
+    }
     // Step 2: Call the ERC20 contract to approve the transfer of tokens
     const approveTokenTransactionParams = {
       from: account, // Hardcoded address for testing
@@ -63,7 +64,7 @@ export const Pool = ({ account }) => {
       data: tokenContractInstance.methods
         .approve(macContractAddress, ethers.utils.parseEther(amount))
         .encodeABI(),
-    };
+    }
 
     // Step 3: Call the main contract to supply insurance.
     const supplyInsuranceTransactionParams = {
@@ -72,16 +73,16 @@ export const Pool = ({ account }) => {
       data: macContractInstance.methods
         .supplyPool(id, ethers.utils.parseEther(amount))
         .encodeABI(),
-    };
+    }
 
     try {
-      await web3.eth.sendTransaction(initInsuranceTransactionParams);
-      await web3.eth.sendTransaction(approveTokenTransactionParams);
-      await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
+      await web3.eth.sendTransaction(initInsuranceTransactionParams)
+      await web3.eth.sendTransaction(approveTokenTransactionParams)
+      await web3.eth.sendTransaction(supplyInsuranceTransactionParams)
     } catch (err) {
-      console.log("err: ", err);
+      console.log("err: ", err)
     }
-  };
+  }
 
   const tokens = [
     {
@@ -98,41 +99,47 @@ export const Pool = ({ account }) => {
       contractAddress: "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
       priceFeed: "0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF",
     },
-  ];
+  ]
 
-  let footer = <p>Please pick the first day.</p>;
+  let footer = <p>Please pick the first day.</p>
   if (range?.from) {
     if (!range.to) {
-      footer = <p>{format(range.from, "PPP")}</p>;
+      footer = <p>{format(range.from, "PPP")}</p>
     } else if (range.to) {
       footer = (
         <p>
           {format(range.from, "PPP")}–{format(range.to, "PPP")}
         </p>
-      );
+      )
     }
   }
 
   // time variables to calculate the contract inputs in second differences
-  const t0 = new Date();
-  const t1 = new Date(range?.from);
-  const t2 = new Date(range?.to);
+  const t0 = new Date()
+  const t1 = new Date(range?.from)
+  const t2 = new Date(range?.to)
 
-  const startDate = ((t1.getTime() - t0.getTime()) / 1000).toFixed(0); //_startDateFromDeployInSeconds
-  const endDate = ((t2.getTime() - t0.getTime()) / 1000).toFixed(0); //_endDateFromDeployInSeconds
+  const startDate = ((t1.getTime() - t0.getTime()) / 1000).toFixed(0) //_startDateFromDeployInSeconds
+  const endDate = ((t2.getTime() - t0.getTime()) / 1000).toFixed(0) //_endDateFromDeployInSeconds
 
   useEffect(() => {
     if (range && range.from && range.to) {
-      setShowDatePicker(false);
-      setDateRangePicked(true);
+      setShowDatePicker(false)
+      setDateRangePicked(true)
     }
-  }, [range]);
+  }, [range])
   return (
     <div className={s.container}>
       <div className={s.wrapper}>
         <h3 className={s.tabHeader}>Create Insurance Pool</h3>
         <div className={s.row}>
-          <p className={s.rowLabel}>Select Token</p>
+          <Tooltip
+            placement="left"
+            arrow
+            title="Select token tooltip is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"
+          >
+            <p className={s.rowLabel}>Select Token</p>
+          </Tooltip>
           <div className={s.rowValue}>
             <Select
               theme={(theme) => ({
@@ -165,7 +172,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Insurance fee</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="Insurance fee tooltip is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"
+          >
+            <p className={s.rowLabel}>Insurance fee</p>
+          </Tooltip>
           <div className={s.rowValue}>
             <input
               className={s.numInput}
@@ -178,7 +191,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Price Loss Cover %</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="price loss cover tooltip is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"
+          >
+            <p className={s.rowLabel}>Price Loss Cover %</p>
+          </Tooltip>
           <div className={s.inputWithPreview}>
             <input
               className={s.numInput}
@@ -191,7 +210,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Validity period</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="Validity period tooltip is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"
+          >
+            <p className={s.rowLabel}>Validity period</p>
+          </Tooltip>
           <div className={s.rowValue}>
             {!dateRangePicked && !showDatePicker && (
               <Button
@@ -250,5 +275,5 @@ export const Pool = ({ account }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
