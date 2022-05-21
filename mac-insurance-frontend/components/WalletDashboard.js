@@ -7,6 +7,7 @@ import { DashboardDetailsModal } from "./modals/DashboardDetailsModal";
 import { ToastContainer, toast } from "react-toastify";
 import { gql, useQuery } from "@apollo/client";
 import { ethers } from "ethers";
+import { useRetrieveTokenData } from "../hooks/useRetrieveTokenData";
 import MacInsurance from "../abis/MacInsuranceMain.json";
 
 const GET_PROFILE_POOLS = gql`
@@ -56,26 +57,8 @@ export const WalletDashboard = ({ account }) => {
 
   const pools = poolsData?.insuranceRequestEntities;
 
-  const retrieveTokenData = (tokenAddress) => {
-    const tokenData = {
-      name: "",
-      logo: "",
-    };
-    const checkSumAddress = ethers.utils.getAddress(tokenAddress);
-    switch (checkSumAddress) {
-      case "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735":
-        tokenData.name = "DAI";
-        tokenData.logo = daiLogo;
-        break;
-      case "0xc778417E063141139Fce010982780140Aa0cD5Ab":
-        tokenData.name = "WETH";
-        tokenData.logo = ethLogo;
-        break;
-      default:
-        break;
-    }
-    return tokenData;
-  };
+  const retrieveTokenData = (tokenAddress) =>
+    useRetrieveTokenData(tokenAddress);
 
   const reimburse = async (poolId) => {
     const transactionParams = {
@@ -110,8 +93,8 @@ export const WalletDashboard = ({ account }) => {
       <h3 className={s.tabHeader}>Your positions</h3>
       <div>
         <div className={s.tableRow}>
-          <p className={s.tableHead}>Assets</p>
-          <p className={s.tableHead}>Balance</p>
+          <p className={s.tableHeadAsset}>Assets</p>
+          <p className={s.tableHead}>Insurance Request</p>
           <p className={s.tableHead}>Fee Amount</p>
         </div>
         {poolsLoading && <div>...loading</div>}
@@ -125,12 +108,15 @@ export const WalletDashboard = ({ account }) => {
                     width={30}
                     height={30}
                   />
-                  <p>{retrieveTokenData(item.tokenAddress).name}</p>
                 </div>
                 <p className={s.data}>
-                  {item.insuranceLiquidityRequest / 10 ** 18}
+                  {item.insuranceLiquidityRequest / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
                 </p>
-                <p className={s.data}>{item.feeAmount / 10 ** 18}</p>
+                <p className={s.data}>
+                  {item.feeAmount / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
+                </p>
                 <div className={s.data}>
                   <button
                     onClick={() => reimburse(item.poolId)}

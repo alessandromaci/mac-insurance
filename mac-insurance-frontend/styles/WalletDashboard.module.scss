@@ -23,11 +23,20 @@
 }
 
 .tableHead {
+  text-align: center;
+  padding: $x1 0;
+  font-size: 18px;
+  font-weight: 100;
+  width: 180px;
+  margin: 0;
+}
+
+.tableHeadAsset {
   text-align: left;
   padding: $x1 0;
   font-size: 18px;
   font-weight: 100;
-  width: 160px;
+  width: 80px;
   margin: 0;
 }
 

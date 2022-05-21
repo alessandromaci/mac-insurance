@@ -14,6 +14,7 @@ export const RequestModal = ({ item, pool, show, onClose, account }) => {
   const [isBrowser, setIsBrowser] = useState(false);
   const [amount, setAmount] = useState(0);
   const [fee, setFee] = useState(0);
+  const [buttonText, setButtonText] = useState(true);
 
   const macContractInstance = new web3.eth.Contract(
     MacInsurance.abi,
@@ -45,8 +46,10 @@ export const RequestModal = ({ item, pool, show, onClose, account }) => {
     };
 
     try {
+      setButtonText(false);
       await web3.eth.sendTransaction(approveTokenTransactionParams);
       await web3.eth.sendTransaction(transactionParams);
+      setButtonText(true);
     } catch (err) {
       console.log("err: ", err);
     }
@@ -99,7 +102,7 @@ export const RequestModal = ({ item, pool, show, onClose, account }) => {
         </p>
         <div className={s.buttonContainer}>
           <button className={s.modalButton} onClick={requestInsurance}>
-            Request
+            {buttonText ? `Request` : `Loading...`}
           </button>
           <button className={s.modalButton} onClick={onClose}>
             Cancel

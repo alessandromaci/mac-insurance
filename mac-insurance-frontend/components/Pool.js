@@ -4,7 +4,10 @@ import Select from "react-select";
 import { Button } from "./Button";
 import ethLogo from "../public/ethLogo.png";
 import daiLogo from "../public/dai-logo.png";
+import uscLogo from "../public/usdc-logo.png";
+import snxLogo from "../public/snx-logo.png";
 import Image from "next/image";
+import { ToastContainer, toast } from "react-toastify";
 import { addDays, format } from "date-fns";
 import { DateRange, DayPicker, useDayRender } from "react-day-picker";
 import "react-day-picker/dist/style.css";
@@ -26,6 +29,7 @@ export const Pool = ({ account }) => {
   const [fee, setFee] = useState(null);
   const [lossCover, setLossCover] = useState(null);
   const [amount, setAmount] = useState(null);
+  const [buttonText, setButtonText] = useState(true);
 
   // Step 0: Creating contract instance for mac and ERC20
   const macContractInstance = new web3.eth.Contract(
@@ -76,9 +80,21 @@ export const Pool = ({ account }) => {
     };
 
     try {
+      setButtonText(false);
       await web3.eth.sendTransaction(initInsuranceTransactionParams);
       await web3.eth.sendTransaction(approveTokenTransactionParams);
       await web3.eth.sendTransaction(supplyInsuranceTransactionParams);
+      setButtonText(true);
+      toast.success("You created a new insurance pool!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } catch (err) {
       console.log("err: ", err);
     }
@@ -98,6 +114,20 @@ export const Pool = ({ account }) => {
       img: daiLogo,
       contractAddress: "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
       priceFeed: "0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF",
+    },
+    {
+      value: "usdc",
+      label: "USDC",
+      img: uscLogo,
+      contractAddress: "0xeb8f08a975Ab53E34D8a0330E0D34de942C95926",
+      priceFeed: "0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB",
+    },
+    {
+      value: "snx",
+      label: "SNX",
+      img: snxLogo,
+      contractAddress: "0x322A3346bf24363f451164d96A5b5cd5A7F4c337",
+      priceFeed: "0xE96C4407597CD507002dF88ff6E0008AB41266Ee",
     },
   ];
 
@@ -250,7 +280,7 @@ export const Pool = ({ account }) => {
         <div className={s.poolSummary}>
           <h3 className={s.summaryHeading}>Supply Liquidity</h3>
           <div className={s.supplyContainer}>
-            <p className={s.summaryLiquidity}>{selectedToken?.label ?? "NA"}</p>
+            <p className={s.summaryLiquidity}>{selectedToken?.label ?? ""}</p>
             <input
               className={s.supplyInput}
               type="number"
@@ -264,10 +294,11 @@ export const Pool = ({ account }) => {
           <Button
             handleClick={() => initAndSupplyInsurance()}
             className={s.button}
-            buttonText="Approve"
+            buttonText={buttonText ? "Create" : "Loading..."}
           />
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
