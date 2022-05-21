@@ -63,8 +63,6 @@ export const WalletDashboard = ({ account }) => {
 
   const pools = poolsData?.insuranceRequestEntities;
 
-  const retrieveTokenData = (tokenAddress) =>
-    useRetrieveTokenData(tokenAddress);
   // small hack to show how the reimbursement will work. I have created a separate pool list that will interact with test contract only
   const testPools = [
     {
@@ -97,7 +95,6 @@ export const WalletDashboard = ({ account }) => {
     }
     return tokenData;
   };
->>>>>>> 5778e86 (adding a separate test flow to show how reimbursement works)
 
   const reimburse = async (poolId) => {
     const transactionParams = {
@@ -213,18 +210,22 @@ export const WalletDashboard = ({ account }) => {
           {testPools?.map((item, index) => (
             <div key={index}>
               <div className={s.tableRow}>
-                <div className={s.data}>
+                <div className={s.dataAsset}>
                   <Image
                     src={retrieveTokenData(item.tokenAddress).logo}
                     width={30}
                     height={30}
                   />
-                  <p>TEST {retrieveTokenData(item.tokenAddress).name}</p>
+                  {/* <p>TEST {retrieveTokenData(item.tokenAddress).name}</p> */}
                 </div>
                 <p className={s.data}>
-                  {item.insuranceLiquidityRequest / 10 ** 18}
+                  TEST {item.insuranceLiquidityRequest / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
                 </p>
-                <p className={s.data}>{item.feeAmount / 10 ** 18}</p>
+                <p className={s.data}>
+                  TEST {item.feeAmount / 10 ** 18}{" "}
+                  {retrieveTokenData(item.tokenAddress).name}
+                </p>
                 <div className={s.data}>
                   <button
                     onClick={() => testReimburse(item.poolId)}
