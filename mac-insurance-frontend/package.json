@@ -15,6 +15,7 @@
     "@coinbase/wallet-sdk": "^3.0.11",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.8.0",
     "@walletconnect/web3-provider": "^1.7.8",
     "date-fns": "^2.28.0",
     "ethers": "^5.6.5",
