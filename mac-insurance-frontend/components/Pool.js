@@ -14,6 +14,7 @@ import "react-day-picker/dist/style.css";
 import { ethers } from "ethers";
 import MacInsurance from "../abis/MacInsuranceMain.json";
 import ERC20 from "../abis/TokenMain.json";
+import Tooltip from "@mui/material/Tooltip";
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
@@ -195,7 +196,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Insurance fee %</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="This represents the percentage of total value insured used for fee and it is used to calculate the user's premium insurance "
+          >
+            <p className={s.rowLabel}>Insurance fee %</p>
+          </Tooltip>
           <div className={s.rowValue}>
             <input
               className={s.numInput}
@@ -208,7 +215,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Price Loss Cover %</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="This represents the percetage of price loss that the pool will cover. Beyond this percentage, the user will be reimbursed the loss cover amount"
+          >
+            <p className={s.rowLabel}>Price Loss Cover %</p>
+          </Tooltip>
           <div className={s.inputWithPreview}>
             <input
               className={s.numInput}
@@ -221,7 +234,13 @@ export const Pool = ({ account }) => {
           </div>
         </div>
         <div className={s.row}>
-          <p className={s.rowLabel}>Validity period</p>
+          <Tooltip
+            arrow
+            placement="left"
+            title="This represents the activity period of the insurance pool. Users will be able to receive their reimbursemnts during the activity period. It is however not possible both to supply new liquidity and request insurance during this period."
+          >
+            <p className={s.rowLabel}>Validity period</p>
+          </Tooltip>
           <div className={s.rowValue}>
             {!dateRangePicked && !showDatePicker && (
               <Button
