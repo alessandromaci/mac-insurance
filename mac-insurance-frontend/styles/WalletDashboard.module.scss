@@ -23,11 +23,11 @@
 }
 
 .tableHead {
-  text-align: center;
+  text-align: left;
   padding: $x1 0;
   font-size: 18px;
   font-weight: 100;
-  width: 180px;
+  width: 195px;
   margin: 0;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .data {
-  text-align: left;
+  text-align: center;
   padding: $x1 0;
   font-size: 14px;
   font-weight: 100;
@@ -54,16 +54,28 @@
   margin: 0;
 }
 
+.dataAsset {
+  text-align: left;
+  padding: $x1 0;
+  font-size: 14px;
+  font-weight: 100;
+  width: 80px;
+  margin: 0;
+}
+
 .dataButton {
   background-color: transparent;
-  border: none;
+  border: 1px solid $green;
+  width: 95px;
   color: $green;
   font-size: 16px;
   font-weight: 300;
   cursor: pointer;
+  margin: 4px 0;
 
   &:hover {
-    text-decoration: underline;
     opacity: 0.7;
+    background-color: $green;
+    color: $dark;
   }
 }

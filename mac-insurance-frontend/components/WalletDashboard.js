@@ -93,7 +93,7 @@ export const WalletDashboard = ({ account }) => {
       <h3 className={s.tabHeader}>Your positions</h3>
       <div>
         <div className={s.tableRow}>
-          <p className={s.tableHeadAsset}>Assets</p>
+          <p className={s.tableHeadAsset}>Asset</p>
           <p className={s.tableHead}>Insurance Request</p>
           <p className={s.tableHead}>Fee Amount</p>
         </div>
@@ -102,7 +102,7 @@ export const WalletDashboard = ({ account }) => {
           {pools?.map((item, index) => (
             <div key={index}>
               <div className={s.tableRow}>
-                <div className={s.data}>
+                <div className={s.dataAsset}>
                   <Image
                     src={retrieveTokenData(item.tokenAddress).logo}
                     width={30}

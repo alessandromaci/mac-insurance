@@ -92,7 +92,7 @@ export const Markets = ({ account }) => {
       <h3 className={s.tabHeader}>Open Insurance Pools</h3>
       <div>
         <div className={s.tableRow}>
-          <p className={s.assetHead}>Assets</p>
+          <p className={s.assetHead}>Asset</p>
           <p className={s.priceLossHead}>Price Loss</p>
           <p className={s.feeHead}>Fee</p>
           <p className={s.validityDataHead}>Validity Period</p>
@@ -112,10 +112,10 @@ export const Markets = ({ account }) => {
                 {`${calculateLossPercentage(
                   item.tresholdPrice,
                   item.basePrice
-                )} % (< $${item.tresholdPrice / 10 ** 8})`}
+                )} % (< $${(item.tresholdPrice / 10 ** 8).toFixed(4)})`}
               </p>
               <p className={s.feeData}>{item.feePercentage} %</p>
-              <div className={s.validityData}>
+              <div className={s.validityDataData}>
                 <p>{retrieveValidityPeriod(item.startDate, item.endDate)}</p>
               </div>
 
