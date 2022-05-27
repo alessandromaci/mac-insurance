@@ -31,6 +31,8 @@ library DataTypes {
         address liquidityProvider;
         // token amount invested in the insurance pool
         uint256 liquidityAdded;
+        // boolean value to register when user has withdrawn liquidity
+        bool liquidityWithdrawn;
     }
 
     struct InsuranceRequest {

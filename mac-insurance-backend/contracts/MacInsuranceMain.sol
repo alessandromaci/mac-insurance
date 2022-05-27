@@ -15,7 +15,7 @@ contract MacInsuranceMain {
     IERC20 internal insuredToken;
 
     mapping(uint16 => DataTypes.PoolData) public poolDataList;
-    mapping(uint16 => DataTypes.PoolLiquiditySupply) public liquiditySupplyList;
+    mapping(uint16 => mapping(address => DataTypes.PoolLiquiditySupply)) public liquiditySupplyList;
     mapping(uint16 => mapping(address => DataTypes.InsuranceRequest))
         public insuranceRequests;
 
@@ -135,7 +135,7 @@ contract MacInsuranceMain {
 
     function supplyPool(uint16 _id, uint256 _amount) public returns (uint256) {
         if (_id > id) {
-            revert Errors.PoolIdNotCreated();
+            revert Errors.PoolIdNotExist();
         }
 
         if (block.timestamp >= poolDataList[_id].startDate) {
@@ -145,14 +145,18 @@ contract MacInsuranceMain {
         DataTypes.PoolLiquiditySupply memory poolSupply;
 
         //transfering insured token to this contract and TVL updated
-        insuredToken.transferFrom(msg.sender, address(this), _amount);
-        poolDataList[_id].totalLiquidity += _amount;
+        bool success = insuredToken.transferFrom(msg.sender, address(this), _amount);
+        if (success) {
+            poolDataList[_id].totalLiquidity += _amount;
+        } else {
+            revert Errors.TransferFailed();
+        }
 
         poolSupply.id = _id;
         poolSupply.liquidityProvider = msg.sender;
         poolSupply.liquidityAdded = _amount;
 
-        liquiditySupplyList[_id] = poolSupply;
+        liquiditySupplyList[_id][msg.sender] = poolSupply;
 
         emit PoolUpdated(
             _id,
@@ -166,6 +170,46 @@ contract MacInsuranceMain {
         );
 
         return (poolDataList[_id].totalLiquidity);
+    }
+
+    function withdrawPool(uint16 _id) public {
+        if (_id > id) {
+            revert Errors.PoolIdNotExist();
+        }
+
+        if (block.timestamp >= poolDataList[_id].startDate) {
+            revert Errors.InsuranceInActivePeriod();
+        }
+
+        if (liquiditySupplyList[_id][msg.sender].liquidityWithdrawn == true) {
+            revert Errors.LiquidtyAlreadyWithdrawn();
+        }
+
+        uint256 withdrawAmount = liquiditySupplyList[_id][msg.sender].liquidityAdded;
+        
+        bool success = insuredToken.transferFrom(address(this), msg.sender, withdrawAmount);
+        if (success) {
+            poolDataList[_id].totalLiquidity -= withdrawAmount;
+        } else {
+            revert Errors.TransferFailed();
+        }
+
+        // check that he hasn't withdrawn yet
+        liquiditySupplyList[_id][msg.sender].liquidityWithdrawn = true;
+
+        emit PoolUpdated(
+            _id,
+            poolDataList[_id].tokenAddress,
+            poolDataList[_id].basePrice,
+            poolDataList[_id].insuranceTreshold,
+            poolDataList[_id].fee, 
+            poolDataList[_id].totalLiquidity,
+            poolDataList[_id].startDate,
+            poolDataList[_id].endDate
+        );
+
+
+
     }
 
     function requestInsurance(uint16 _id, uint256 _amount) public {
@@ -193,7 +237,11 @@ contract MacInsuranceMain {
             revert Errors.NotEnoughInsuranceLiquidity();
         }
 
-        insuredToken.transferFrom(msg.sender, address(this), feeAmount);
+        bool success = insuredToken.transferFrom(msg.sender, address(this), feeAmount);
+
+        if (!success) {
+            revert Errors.TransferFailed();
+        }
 
         insuranceRequest.id = _id;
         insuranceRequest.insuranceRequester = msg.sender;
@@ -236,6 +284,8 @@ contract MacInsuranceMain {
         );
         if (success) {
             insuranceRequests[_id][msg.sender].liquidtyToInsure = 0;
+        } else {
+            revert Errors.TransferFailed();
         }
     }
 }
