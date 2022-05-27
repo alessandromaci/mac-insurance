@@ -148,7 +148,6 @@ describe("TestMacInsurance", function () {
     const feeAmount = `${insuranceRequestDetail[4].toString()}`;
 
     const balanceUserBefore = await uniContractWithUser.balanceOf(user.address);
-    console.log(balanceUserBefore);
 
     // step 5: time passes and we simulate a price change
     await ethers.provider.send("evm_increaseTime", [oneDay]);
@@ -159,7 +158,6 @@ describe("TestMacInsurance", function () {
     const txReimbursement = await macContractUser.requestReimbursement(0);
 
     const balanceUserAfter = await uniContractWithUser.balanceOf(user.address);
-    console.log(balanceUserAfter);
 
     const balanceDifference = `${balanceUserAfter
       .sub(balanceUserBefore)
