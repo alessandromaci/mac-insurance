@@ -181,7 +181,7 @@ contract MacInsuranceMain {
             revert Errors.RequesterUnauthorized();
         }
 
-        if (block.timestamp >= poolDataList[_id].startDate && block.timestamp <= poolDataList[_id].endDate ) {
+        if (block.timestamp <= poolDataList[_id].endDate ) {
             revert Errors.InsuranceInActivePeriod();
         }
 
