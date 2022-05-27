@@ -177,7 +177,11 @@ contract MacInsuranceMain {
             revert Errors.PoolIdNotExist();
         }
 
-        if (block.timestamp >= poolDataList[_id].startDate) {
+        if (liquiditySupplyList[_id][msg.sender].liquidityProvider != msg.sender) {
+            revert Errors.RequesterUnauthorized();
+        }
+
+        if (block.timestamp >= poolDataList[_id].startDate && block.timestamp <= poolDataList[_id].endDate ) {
             revert Errors.InsuranceInActivePeriod();
         }
 

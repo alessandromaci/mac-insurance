@@ -11,4 +11,5 @@ library Errors {
     error InsuranceInActivePeriod();
     error LiquidtyAlreadyWithdrawn();
     error TransferFailed();
+    error RequesterUnauthorized();
 }
