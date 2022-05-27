@@ -255,13 +255,13 @@ contract Test_MacInsuranceMain {
 
     function requestReimbursement(uint16 _id) public {
 
-        if (block.timestamp <= poolDataList[_id].startDate) {
+        if (block.timestamp <= poolDataList[_id].startDate || block.timestamp > poolDataList[_id].endDate) {
             revert Errors.InsuranceInActivePeriod();
         }
 
-        if (block.timestamp > poolDataList[_id].endDate) {
-            revert Errors.InsuranceInActivePeriod();
-        }        
+        if (insuranceRequests[_id][msg.sender].insuranceRequester != msg.sender) {
+            revert Errors.RequesterUnauthorized();
+        }     
 
         int256 tokenPrice = testTokenPrice;
         if (tokenPrice > poolDataList[_id].insuranceTreshold) {

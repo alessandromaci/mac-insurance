@@ -211,9 +211,6 @@ contract MacInsuranceMain {
             poolDataList[_id].startDate,
             poolDataList[_id].endDate
         );
-
-
-
     }
 
     function requestInsurance(uint16 _id, uint256 _amount) public {
@@ -266,13 +263,13 @@ contract MacInsuranceMain {
 
     function requestReimbursement(uint16 _id) public {
 
-        if (block.timestamp <= poolDataList[_id].startDate) {
+        if (block.timestamp <= poolDataList[_id].startDate || block.timestamp > poolDataList[_id].endDate) {
             revert Errors.InsuranceInActivePeriod();
         }
 
-        if (block.timestamp > poolDataList[_id].endDate) {
-            revert Errors.InsuranceInActivePeriod();
-        }        
+        if (insuranceRequests[_id][msg.sender].insuranceRequester != msg.sender) {
+            revert Errors.RequesterUnauthorized();
+        }
 
         int256 tokenPrice = getLatestPrice();
         if (tokenPrice > poolDataList[_id].insuranceTreshold) {
