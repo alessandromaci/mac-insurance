@@ -155,6 +155,46 @@ describe("MacInsurance", function () {
     const poolDetail = await macContractSigner.poolDataList(0);
     expect(poolDetail[2]).to.equal(uniSmall);
   });
+  it("Should not be possible to supply a pool that doesn't exist", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const whaleSigner = await ethers.getSigner(randomAddress);
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+
+    const oneDay = 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      oneDay,
+      oneYear
+    );
+
+    const receipt1 = await uniContractWithSigner.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    try {
+      await macContract.supplyPool(5, uniSmall);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "PoolIdNotExist()");
+    }
+  });
   it("Should be possible to request a pool insurance", async function () {
     const macInterface = await ethers.getContractFactory("MacInsuranceMain");
     const macContract = await macInterface.deploy();

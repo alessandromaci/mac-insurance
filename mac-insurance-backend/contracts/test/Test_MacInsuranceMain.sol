@@ -44,6 +44,13 @@ contract Test_MacInsuranceMain {
         id = 0;
     }
 
+    modifier existPool(uint16 _id) {
+        if (_id > id) {
+            revert Errors.PoolIdNotExist();
+        }
+        _;
+    }
+
     function getLatestPrice() internal view returns (int256) {
         (
             ,
@@ -148,11 +155,11 @@ contract Test_MacInsuranceMain {
         return (pool);
     }
 
-    function supplyPool(uint16 _id, uint256 _amount) public returns (uint256) {
-        if (_id > id) {
-            revert Errors.PoolIdNotExist();
-        }
-
+    function supplyPool(uint16 _id, uint256 _amount)
+        public
+        existPool(_id)
+        returns (uint256)
+    {
         if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
         }
@@ -191,11 +198,7 @@ contract Test_MacInsuranceMain {
         return (poolDataList[_id].totalLiquidity);
     }
 
-    function withdrawPool(uint16 _id) public {
-        if (_id > id) {
-            revert Errors.PoolIdNotExist();
-        }
-
+    function withdrawPool(uint16 _id) public existPool(_id) {
         if (
             liquiditySupplyList[_id][msg.sender].liquidityProvider != msg.sender
         ) {
@@ -239,7 +242,10 @@ contract Test_MacInsuranceMain {
         );
     }
 
-    function requestInsurance(uint16 _id, uint256 _amount) public {
+    function requestInsurance(uint16 _id, uint256 _amount)
+        public
+        existPool(_id)
+    {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
 
         if (block.timestamp >= poolDataList[_id].startDate) {
@@ -291,7 +297,7 @@ contract Test_MacInsuranceMain {
         );
     }
 
-    function requestReimbursement(uint16 _id) public {
+    function requestReimbursement(uint16 _id) public existPool(_id) {
         if (
             block.timestamp <= poolDataList[_id].startDate ||
             block.timestamp > poolDataList[_id].endDate
