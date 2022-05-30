@@ -300,6 +300,10 @@ contract MacInsuranceMain {
             revert Errors.RequesterUnauthorized();
         }
 
+        if (insuranceRequests[_id][msg.sender].reimbursementReceived == true) {
+            revert Errors.ReimburesementAlreadyReceived();
+        }
+
         int256 tokenPrice = getLatestPrice();
         if (tokenPrice > poolDataList[_id].insuranceTreshold) {
             revert Errors.ReimburesementRequirementNotMet();
@@ -314,6 +318,7 @@ contract MacInsuranceMain {
         );
         if (success) {
             insuranceRequests[_id][msg.sender].liquidtyToInsure = 0;
+            insuranceRequests[_id][msg.sender].reimbursementReceived = true;
         } else {
             revert Errors.TransferFailed();
         }

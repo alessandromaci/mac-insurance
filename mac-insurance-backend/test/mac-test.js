@@ -2,7 +2,6 @@ const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("MacInsurance", function () {
-  const IERC20_SOURCE = "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20";
   const UNI_ADDRESS = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
   // uni-usd price feed
   const UNI_ADDRESS_priceFeed = "0x553303d460EE0afB37EdFf9bE42922D8FF63220e";

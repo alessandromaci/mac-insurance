@@ -19,9 +19,9 @@ library DataTypes {
         // the percentage of fee to require this pool insurance
         uint8 fee;
         // beginning of insurance active period
-        uint startDate;
+        uint256 startDate;
         // end of insurance active period
-        uint endDate;
+        uint256 endDate;
     }
 
     struct PoolLiquiditySupply {
@@ -46,5 +46,7 @@ library DataTypes {
         uint256 reimbursementAmount;
         // token amount paid to the providers for the insurance
         uint256 fee;
+        // boolean value to register when user has received the reimbursement
+        bool reimbursementReceived;
     }
 }

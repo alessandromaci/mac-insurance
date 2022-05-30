@@ -10,6 +10,7 @@ library Errors {
     error EndDateEarlierThanStartDate();
     error InsuranceInActivePeriod();
     error LiquidtyAlreadyWithdrawn();
+    error ReimburesementAlreadyReceived();
     error TransferFailed();
     error RequesterUnauthorized();
 }
