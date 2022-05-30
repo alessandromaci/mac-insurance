@@ -8,6 +8,9 @@ import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/// @title A decentralized insurance protocol
+/// @author Alessandro Maci
+/// @notice You can use this contract for creating and requesting your own insurance contracts.
 contract MacInsuranceMain {
     uint16 public id;
     address tokenAddress;
@@ -50,6 +53,9 @@ contract MacInsuranceMain {
         _;
     }
 
+    /// @notice Used to retrieve latest price from price feed
+    /// @dev This is the reccomended way to retrieve the price from the price feed acccording to Chainlink docs.
+    /// @return token price with decimals based on price feed
     function getLatestPrice() internal view returns (int256) {
         (
             ,
@@ -62,6 +68,10 @@ contract MacInsuranceMain {
         return price;
     }
 
+    /// @notice Calculate the amount of fee to be paid by user to request an insurance
+    /// @param _id the id of the pool that users wants to be insured
+    /// @param _amount the amount of token that the user wants to be insured
+    /// @return the amount of fee to be paid by user to request an insurance in 10**18
     function getUserFee(uint16 _id, uint256 _amount)
         public
         view
@@ -76,6 +86,10 @@ contract MacInsuranceMain {
         return userFee;
     }
 
+    /// @notice Calculate the amount of reimbursement to be paid by user to request when the insurance criterias are met
+    /// @param _id the id of the pool to calculate reimbursement
+    /// @param _amount the amount of token to calculate reimbursement
+    /// @return the amount of to be paid to user when insurance criteria are met in 10**18
     function getReimbursement(uint16 _id, uint256 _amount)
         public
         view
@@ -92,6 +106,15 @@ contract MacInsuranceMain {
         return reimbursementAmount;
     }
 
+    /// @notice It generates a new insurance pool with the given parameters
+    /// @dev each pool has a unique id that it is increased by 1 for each new pool. Also, a struct is created for each pool and asseciated to it throug a mapping called poolDataList
+    /// @param _tokenAddress The ERC20 token address that the pool will be based on
+    /// @param _priceFeed The address of the price feed contract
+    /// @param _insuranceLossCoverage The percentage of loss cover that the user wants to have for the selected token. The input 10 for example represents that the insurance will cover a price loss of 10%
+    /// @param _fee The percentage of fee that it will be charged to the user to request an insurance
+    /// @param _startDateFromDeployInSeconds The beginning of the insurance validity period in seconds from the deployment of the pool. The validity period is the period of time where the insurance is active and no more users/investors can partecipate to the insurance pool.
+    /// @param _endDateFromDeployInSeconds The end of the insurance validity period in seconds from the deployment of the pool. The validity period is the period of time where the insurance is active and no more users/investors can partecipate to the insurance pool.
+    /// @return the pool data in a struct format
     function initPool(
         address _tokenAddress,
         address _priceFeed,
@@ -150,6 +173,11 @@ contract MacInsuranceMain {
         return (pool);
     }
 
+    /// @notice It allows the user to add new liquidity to the selected insurance pool
+    /// @dev the function transfers the amount of token to the pool and updates the pool data. this requires a separate erc20 approve to allow this contract to spend the token in the name of the user
+    /// @param _id the id of the pool to add new liquidity
+    /// @param _amount the amount of token to add to the insurance pool
+    /// @return the liquidity amount supplied to the insurance pool
     function supplyPool(uint16 _id, uint256 _amount)
         public
         existPool(_id)
@@ -193,6 +221,8 @@ contract MacInsuranceMain {
         return (poolDataList[_id].totalLiquidity);
     }
 
+    /// @notice It allows the insurance provider to withdraw liquidity at the end of the insurance validity period
+    /// @param _id the id of the pool to withdraw liquidity
     function withdrawPool(uint16 _id) public existPool(_id) {
         if (
             liquiditySupplyList[_id][msg.sender].liquidityProvider != msg.sender
@@ -237,6 +267,10 @@ contract MacInsuranceMain {
         );
     }
 
+    /// @notice It allows the user to request an insurance from one of the existing insurance pools
+    /// @dev there is one check in the function to validate that the user has the balance of the token to cover the insurance. This is done to avoid users misusing the insurance contract and requesting an insurance for an amount they don't have. However, this check is only at the moment of the request. If the user withdraws the insurance before the end of the validity period, the check is not performed. It is a security gap
+    /// @param _id the id of the pool to request an insurance
+    /// @param _amount the amount of token to request an insurance for
     function requestInsurance(uint16 _id, uint256 _amount)
         public
         existPool(_id)
@@ -292,6 +326,9 @@ contract MacInsuranceMain {
         );
     }
 
+    /// @notice It allows the insurance requester to ask and then receive the reimbursement of the insurance when the criteria are met
+    /// @dev only the insurance requester can ask for its own reimbursement
+    /// @param _id the id of the pool to request for reimbursement
     function requestReimbursement(uint16 _id) public existPool(_id) {
         if (
             block.timestamp <= poolDataList[_id].startDate ||
