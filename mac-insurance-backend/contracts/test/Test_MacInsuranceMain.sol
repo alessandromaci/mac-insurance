@@ -16,7 +16,8 @@ contract Test_MacInsuranceMain {
     IERC20 internal insuredToken;
 
     mapping(uint16 => DataTypes.PoolData) public poolDataList;
-    mapping(uint16 => DataTypes.PoolLiquiditySupply) public liquiditySupplyList;
+    mapping(uint16 => mapping(address => DataTypes.PoolLiquiditySupply))
+        public liquiditySupplyList;
     mapping(uint16 => mapping(address => DataTypes.InsuranceRequest))
         public insuranceRequests;
 
@@ -27,7 +28,7 @@ contract Test_MacInsuranceMain {
         int256 tresholdPrice,
         uint8 fee,
         uint256 liquidityAdded,
-        uint256 startDate, 
+        uint256 startDate,
         uint256 endDate
     );
 
@@ -41,6 +42,13 @@ contract Test_MacInsuranceMain {
 
     constructor() {
         id = 0;
+    }
+
+    modifier existPool(uint16 _id) {
+        if (_id > id) {
+            revert Errors.PoolIdNotExist();
+        }
+        _;
     }
 
     function getLatestPrice() internal view returns (int256) {
@@ -66,10 +74,10 @@ contract Test_MacInsuranceMain {
     {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
         uint16 fee = poolDataList[_id].fee;
-        uint256 f = totalLiquidity * uint256(fee) / 100;
+        uint256 f = (totalLiquidity * uint256(fee)) / 100;
 
         // userFee = (amountToInsure / TVL) * max fee
-        uint256 userFee = _amount * f / totalLiquidity;
+        uint256 userFee = (_amount * f) / totalLiquidity;
         return userFee;
     }
 
@@ -78,28 +86,41 @@ contract Test_MacInsuranceMain {
         view
         returns (uint256)
     {
+        // step1: calculate the 20% amount
+        //amount - (amount / 100 * loss cover)
+        //step2:
+        //(amount - step1) * amount / step1
         uint256 priceLossCover = poolDataList[_id].priceLossCover;
-        uint256 priceDiff = _amount - (_amount / 100 * priceLossCover);
-        uint256 reimbursementAmount = (_amount - priceDiff) * _amount / priceDiff;
+        uint256 priceDiff = _amount - ((_amount / 100) * priceLossCover);
+        uint256 reimbursementAmount = ((_amount - priceDiff) * _amount) /
+            priceDiff;
         return reimbursementAmount;
     }
 
-    function initPool(address _tokenAddress, address _priceFeed, int256 _insuranceLossCoverage, uint8 _fee, uint256 _startDateFromDeployInSeconds, uint256 _endDateFromDeployInSeconds)
-        public
-        returns (DataTypes.PoolData memory)
-    {       
+    function initPool(
+        address _tokenAddress,
+        address _priceFeed,
+        int256 _insuranceLossCoverage,
+        uint8 _fee,
+        uint256 _startDateFromDeployInSeconds,
+        uint256 _endDateFromDeployInSeconds
+    ) public returns (DataTypes.PoolData memory) {
         // initiating the required variable for the ERC20 transfers
         priceFeed = AggregatorV3Interface(_priceFeed);
         insuredToken = IERC20(_tokenAddress);
         tokenAddress = _tokenAddress;
 
         // time inputs created and checck that start date is not later than future
-        uint startDate = block.timestamp + _startDateFromDeployInSeconds * 1 seconds;
-        uint endDate = block.timestamp + _endDateFromDeployInSeconds * 1 seconds;
+        uint256 startDate = block.timestamp +
+            _startDateFromDeployInSeconds *
+            1 seconds;
+        uint256 endDate = block.timestamp +
+            _endDateFromDeployInSeconds *
+            1 seconds;
         if (endDate <= startDate) {
             revert Errors.EndDateEarlierThanStartDate();
         }
-        
+
         DataTypes.PoolData memory pool;
         // retrieving the token price from the oracle
         int256 tokenPrice = testTokenPrice;
@@ -123,7 +144,7 @@ contract Test_MacInsuranceMain {
             tokenAddress,
             tokenPrice,
             insuranceTreshold,
-            _fee, 
+            _fee,
             0,
             startDate,
             endDate
@@ -134,11 +155,11 @@ contract Test_MacInsuranceMain {
         return (pool);
     }
 
-    function supplyPool(uint16 _id, uint256 _amount) public returns (uint256) {
-        if (_id > id) {
-            revert Errors.PoolIdNotCreated();
-        }
-
+    function supplyPool(uint16 _id, uint256 _amount)
+        public
+        existPool(_id)
+        returns (uint256)
+    {
         if (block.timestamp >= poolDataList[_id].startDate) {
             revert Errors.InsuranceInActivePeriod();
         }
@@ -146,21 +167,29 @@ contract Test_MacInsuranceMain {
         DataTypes.PoolLiquiditySupply memory poolSupply;
 
         //transfering insured token to this contract and TVL updated
-        insuredToken.transferFrom(msg.sender, address(this), _amount);
-        poolDataList[_id].totalLiquidity += _amount;
+        bool success = insuredToken.transferFrom(
+            msg.sender,
+            address(this),
+            _amount
+        );
+        if (success) {
+            poolDataList[_id].totalLiquidity += _amount;
+        } else {
+            revert Errors.TransferFailed();
+        }
 
         poolSupply.id = _id;
         poolSupply.liquidityProvider = msg.sender;
         poolSupply.liquidityAdded = _amount;
 
-        liquiditySupplyList[_id] = poolSupply;
+        liquiditySupplyList[_id][msg.sender] = poolSupply;
 
         emit PoolUpdated(
             _id,
             poolDataList[_id].tokenAddress,
             poolDataList[_id].basePrice,
             poolDataList[_id].insuranceTreshold,
-            poolDataList[_id].fee, 
+            poolDataList[_id].fee,
             poolDataList[_id].totalLiquidity,
             poolDataList[_id].startDate,
             poolDataList[_id].endDate
@@ -169,7 +198,54 @@ contract Test_MacInsuranceMain {
         return (poolDataList[_id].totalLiquidity);
     }
 
-    function requestInsurance(uint16 _id, uint256 _amount) public {
+    function withdrawPool(uint16 _id) public existPool(_id) {
+        if (
+            liquiditySupplyList[_id][msg.sender].liquidityProvider != msg.sender
+        ) {
+            revert Errors.RequesterUnauthorized();
+        }
+
+        if (block.timestamp <= poolDataList[_id].endDate) {
+            revert Errors.InsuranceInActivePeriod();
+        }
+
+        if (liquiditySupplyList[_id][msg.sender].liquidityWithdrawn == true) {
+            revert Errors.LiquidtyAlreadyWithdrawn();
+        }
+
+        uint256 withdrawAmount = liquiditySupplyList[_id][msg.sender]
+            .liquidityAdded;
+
+        bool success = insuredToken.transferFrom(
+            address(this),
+            msg.sender,
+            withdrawAmount
+        );
+        if (success) {
+            poolDataList[_id].totalLiquidity -= withdrawAmount;
+        } else {
+            revert Errors.TransferFailed();
+        }
+
+        // check that he hasn't withdrawn yet
+        liquiditySupplyList[_id][msg.sender].liquidityWithdrawn = true;
+
+        emit PoolUpdated(
+            _id,
+            poolDataList[_id].tokenAddress,
+            poolDataList[_id].basePrice,
+            poolDataList[_id].insuranceTreshold,
+            poolDataList[_id].fee,
+            poolDataList[_id].totalLiquidity,
+            poolDataList[_id].startDate,
+            poolDataList[_id].endDate
+        );
+    }
+
+    function requestInsurance(uint16 _id, uint256 _amount)
+        public
+        existPool(_id)
+    {
         uint256 totalLiquidity = poolDataList[_id].totalLiquidity;
 
         if (block.timestamp >= poolDataList[_id].startDate) {
@@ -194,7 +270,15 @@ contract Test_MacInsuranceMain {
             revert Errors.NotEnoughInsuranceLiquidity();
         }
 
-        insuredToken.transferFrom(msg.sender, address(this), feeAmount);
+        bool success = insuredToken.transferFrom(
+            msg.sender,
+            address(this),
+            feeAmount
+        );
+
+        if (!success) {
+            revert Errors.TransferFailed();
+        }
 
         insuranceRequest.id = _id;
         insuranceRequest.insuranceRequester = msg.sender;
@@ -204,7 +288,7 @@ contract Test_MacInsuranceMain {
 
         insuranceRequests[_id][msg.sender] = insuranceRequest;
 
-        emit InsuranceRequestCreated (
+        emit InsuranceRequestCreated(
             _id,
             poolDataList[_id].tokenAddress,
             msg.sender,
@@ -213,15 +297,23 @@ contract Test_MacInsuranceMain {
         );
     }
 
-    function requestReimbursement(uint16 _id) public {
-
-        if (block.timestamp <= poolDataList[_id].startDate) {
+    function requestReimbursement(uint16 _id) public existPool(_id) {
+        if (
+            block.timestamp <= poolDataList[_id].startDate ||
+            block.timestamp > poolDataList[_id].endDate
+        ) {
             revert Errors.InsuranceInActivePeriod();
         }
 
-        if (block.timestamp > poolDataList[_id].endDate) {
-            revert Errors.InsuranceInActivePeriod();
-        }        
+        if (
+            insuranceRequests[_id][msg.sender].insuranceRequester != msg.sender
+        ) {
+            revert Errors.RequesterUnauthorized();
+        }
+
+        if (insuranceRequests[_id][msg.sender].reimbursementReceived == true) {
+            revert Errors.ReimburesementAlreadyReceived();
+        }
 
         int256 tokenPrice = testTokenPrice;
         if (tokenPrice > poolDataList[_id].insuranceTreshold) {
@@ -229,7 +321,7 @@ contract Test_MacInsuranceMain {
         }
 
         uint256 reimbursementAmount = insuranceRequests[_id][msg.sender]
-        .reimbursementAmount;
+            .reimbursementAmount;
         bool success = insuredToken.transferFrom(
             address(this),
             msg.sender,
@@ -237,6 +329,9 @@ contract Test_MacInsuranceMain {
         );
         if (success) {
             insuranceRequests[_id][msg.sender].liquidtyToInsure = 0;
+            insuranceRequests[_id][msg.sender].reimbursementReceived = true;
+        } else {
+            revert Errors.TransferFailed();
         }
     }
 }

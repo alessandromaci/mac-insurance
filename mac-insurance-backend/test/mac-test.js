@@ -2,7 +2,6 @@ const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("MacInsurance", function () {
-  const IERC20_SOURCE = "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20";
   const UNI_ADDRESS = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
   // uni-usd price feed
   const UNI_ADDRESS_priceFeed = "0x553303d460EE0afB37EdFf9bE42922D8FF63220e";
@@ -156,6 +155,46 @@ describe("MacInsurance", function () {
     const poolDetail = await macContractSigner.poolDataList(0);
     expect(poolDetail[2]).to.equal(uniSmall);
   });
+  it("Should not be possible to supply a pool that doesn't exist", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const whaleSigner = await ethers.getSigner(randomAddress);
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+
+    const oneDay = 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      oneDay,
+      oneYear
+    );
+
+    const receipt1 = await uniContractWithSigner.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    try {
+      await macContract.supplyPool(5, uniSmall);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "PoolIdNotExist()");
+    }
+  });
   it("Should be possible to request a pool insurance", async function () {
     const macInterface = await ethers.getContractFactory("MacInsuranceMain");
     const macContract = await macInterface.deploy();
@@ -266,6 +305,265 @@ describe("MacInsurance", function () {
       assert.fail("The transaction should have thrown an error");
     } catch (error) {
       assert.include(error.message, "InsuranceInActivePeriod()");
+    }
+  });
+  it("Should not be possible to withdraw liquidty from a pool insurance during insurance validity period", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const user = account[1];
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+    const uniContractWithUser = uniContract.connect(user);
+
+    const macContractUser = macContract.connect(user);
+
+    const oneDay = 24 * 60 * 60;
+    const sevenDays = 7 * 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      oneDay,
+      oneYear
+    );
+
+    const receipt = await uniContractWithSigner.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    const receipt1 = await uniContractWithUser.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    const txSupply = await macContract.supplyPool(0, uniMedium);
+
+    await ethers.provider.send("evm_increaseTime", [sevenDays]);
+    await ethers.provider.send("evm_mine");
+
+    try {
+      await macContract.withdrawPool(0);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "InsuranceInActivePeriod()");
+    }
+  });
+  it("Should not be possible to withdraw twice", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const user = account[1];
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+    const uniContractWithUser = uniContract.connect(user);
+
+    const macContractUser = macContract.connect(user);
+
+    const oneDay = 24 * 60 * 60;
+    const sevenDays = 7 * 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+    const twoYears = 2 * oneYear;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      sevenDays,
+      oneYear
+    );
+
+    const receipt = await uniContractWithSigner.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    const receipt1 = await uniContractWithUser.approve(
+      macContract.address,
+      uniLarge
+    );
+
+    const txSupply = await macContractUser.supplyPool(0, uniMedium);
+
+    await ethers.provider.send("evm_increaseTime", [twoYears]);
+    await ethers.provider.send("evm_mine");
+
+    const txWithdraw1 = await macContractUser.withdrawPool(0);
+
+    try {
+      await macContractUser.withdrawPool(0);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "LiquidtyAlreadyWithdrawn()");
+    }
+  });
+  it("Should be possible to withdraw liquidty from a pool insurance after insurance validity period", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const user = account[1];
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+    const uniContractWithUser = uniContract.connect(user);
+
+    const macContractUser = macContract.connect(user);
+
+    const oneDay = 24 * 60 * 60;
+    const sevenDays = 7 * 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+    const twoYears = 2 * oneYear;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      sevenDays,
+      oneYear
+    );
+
+    await uniContractWithSigner.approve(macContract.address, uniLarge);
+    await uniContractWithUser.approve(macContract.address, uniLarge);
+
+    await macContractUser.supplyPool(0, uniMedium);
+    await macContract.supplyPool(0, uniMedium);
+
+    await ethers.provider.send("evm_increaseTime", [twoYears]);
+    await ethers.provider.send("evm_mine");
+
+    const balanceBeforeWithdraw = await uniContractWithUser.balanceOf(
+      user.address
+    );
+    const txWithdraw1 = await macContractUser.withdrawPool(0);
+    const balanceAfterWithdraw = await uniContractWithUser.balanceOf(
+      user.address
+    );
+    assert.equal(
+      balanceAfterWithdraw.sub(balanceBeforeWithdraw).toString(),
+      uniMedium.toString()
+    );
+  });
+  it("Should not be possible to withdraw liquidty from a pool insurance before insurance validity period", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const user = account[1];
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+    const uniContractWithUser = uniContract.connect(user);
+
+    const macContractUser = macContract.connect(user);
+
+    const oneDay = 24 * 60 * 60;
+    const sevenDays = 7 * 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+    const twoYears = 2 * oneYear;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      sevenDays,
+      oneYear
+    );
+
+    await uniContractWithSigner.approve(macContract.address, uniLarge);
+    await uniContractWithUser.approve(macContract.address, uniLarge);
+
+    await macContractUser.supplyPool(0, uniMedium);
+    await macContract.supplyPool(0, uniMedium);
+
+    try {
+      await macContractUser.withdrawPool(0);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "InsuranceInActivePeriod()");
+    }
+  });
+  it("Should not be possible to request withdraw if you are not the owner", async function () {
+    const macInterface = await ethers.getContractFactory("MacInsuranceMain");
+    const macContract = await macInterface.deploy();
+
+    const account = await ethers.getSigners();
+    const signer = account[0];
+    const user = account[1];
+
+    const macContractSigner = await new ethers.Contract(
+      macContract.address,
+      macInterface.interface,
+      signer
+    );
+
+    const uniContractWithSigner = uniContract.connect(signer);
+    const uniContractWithUser = uniContract.connect(user);
+
+    const macContractUser = macContract.connect(user);
+
+    const oneDay = 24 * 60 * 60;
+    const sevenDays = 7 * 24 * 60 * 60;
+    const oneYear = oneDay * 365;
+    const twoYears = 2 * oneYear;
+
+    const txInitPool = await macContractSigner.initPool(
+      "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "0x553303d460ee0afb37edff9be42922d8ff63220e",
+      10,
+      3,
+      sevenDays,
+      oneYear
+    );
+
+    await uniContractWithSigner.approve(macContract.address, uniLarge);
+    await uniContractWithUser.approve(macContract.address, uniLarge);
+
+    await macContract.supplyPool(0, uniMedium);
+
+    await ethers.provider.send("evm_increaseTime", [oneDay]);
+    await ethers.provider.send("evm_mine");
+
+    try {
+      await macContractUser.withdrawPool(0);
+      assert.fail("The transaction should have thrown an error");
+    } catch (error) {
+      assert.include(error.message, "RequesterUnauthorized()");
     }
   });
 });
