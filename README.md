@@ -21,7 +21,7 @@ This project represents a prototype for an insurance protocol, that can be used 
 
 ## Contracts
 
-[📚 MAC Ethereum-Rinkeby](https://rinkeby.etherscan.io/address/0xaEE4E8F123632bf55C92760802e49Bfd993aA904)  
+[📚 MAC Ethereum-Rinkeby](https://rinkeby.etherscan.io/address/0xF082bb00Ed368fCA5ec554395A2c2a16b5815De5)  
 [📚 MAC Polygon-Mumbai](https://mumbai.polygonscan.com/address/0x96dDC464EecdF02fB32B8F350b139ac809122e60)
 
 ### Dev Environemnt
